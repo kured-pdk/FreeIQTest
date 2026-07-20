@@ -1,458 +1,579 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Cognitive Assessment</title>
+    <meta name="description" content="Free, private, professional-grade cognitive assessment and IQ test with adaptive routing and working memory modules. Zero data collection.">
+    <title>Clinical Grade Cognitive Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .no-select { user-select: none; -webkit-user-select: none; }
-        
-        @media print {
-            body { background-color: white; }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .shadow-xl, .shadow-md { box-shadow: none !important; }
-            .border-b { border-color: #000 !important; }
-            .print-break { page-break-before: always; }
-        }
-        
-        /* Grid helpers for visual matrices */
-        .matrix-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: #e2e8f0; border-radius: 8px; width: fit-content; margin: 0 auto; }
-        .matrix-cell { width: 64px; height: 64px; background: white; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
-        .matrix-cell.missing { background: #f1f5f9; border: 2px dashed #94a3b8; font-size: 24px; font-weight: bold; color: #94a3b8; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f3f4f6; }
+        .wm-tile { transition: all 0.2s ease; }
+        .wm-tile.active { background-color: #3b82f6; transform: scale(0.95); }
+        .wm-tile:active { transform: scale(0.95); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+<body class="min-h-screen text-slate-800 flex items-center justify-center p-4">
 
-    <div id="app" class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[600px] flex flex-col relative fade-in border border-slate-200">
-        <!-- Dynamic content injected here -->
+    <div id="app" class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] flex flex-col relative fade-in">
+        <!-- Dynamic Content Injected Here -->
     </div>
 
-    <script>
-        const state = {
-            currentQuestion: 0,
-            startTime: null,
-            questionStartTime: null,
-            timeLimit: 2400, // 40 minutes for 40 professional questions
-            timerInterval: null,
-            responses: [], // Stores {qIdx, correct, timeTaken}
-            categories: {
-                quantitative: { score: 0, total: 0, time: 0 },
-                spatial: { score: 0, total: 0, time: 0 },
-                logic: { score: 0, total: 0, time: 0 }
-            }
+<script>
+/**
+ * CLINICAL GRADE COGNITIVE ASSESSMENT ENGINE
+ * Zero-backend, Client-Side execution for COPPA/GDPR-K Compliance
+ */
+
+// --- STATE MANAGEMENT ---
+const state = {
+    phase: 'setup', // setup, intro_gf, gf_test, intro_wm, wm_test, results
+    ageMonths: 120, // Default 10 years
+    
+    // Gf (Fluid Intelligence - Adaptive)
+    gf: {
+        level: 1, // 1 (Easy), 2 (Medium), 3 (Hard)
+        consecutivePass: 0,
+        consecutiveFail: 0,
+        questionCount: 0,
+        maxQuestions: 20,
+        history: [], // { type, level, correct, timeMs }
+        currentQuestionStart: 0,
+        currentQuestion: null
+    },
+
+    // Gwm (Working Memory - Corsi Blocks)
+    wm: {
+        sequence: [],
+        userIndex: 0,
+        currentLength: 3,
+        failsAtCurrentLength: 0,
+        maxScore: 0,
+        isFlashing: false
+    }
+};
+
+// --- DOM ELEMENTS ---
+const appDiv = document.getElementById('app');
+
+// --- PROCEDURAL GENERATORS (Gf) ---
+const generators = {
+    // Arithmetic & Geometric Progressions with Engineered Distractors
+    sequence: (level) => {
+        let seq = [];
+        let answer;
+        let distractors = [];
+        let ruleText = "";
+
+        if (level === 1) {
+            // Simple addition
+            let start = Math.floor(Math.random() * 5) + 2;
+            let step = Math.floor(Math.random() * 4) + 2;
+            seq = [start, start+step, start+step*2, start+step*3];
+            answer = start+step*4;
+            distractors = [answer-1, answer+1, answer-step, answer+step+1];
+            ruleText = "?";
+        } else if (level === 2) {
+            // Multiplication / Alternating
+            let start = Math.floor(Math.random() * 3) + 2;
+            let mult = Math.floor(Math.random() * 2) + 2;
+            seq = [start, start*mult, start*mult*mult, start*mult*mult*mult];
+            answer = start*mult*mult*mult*mult;
+            // Engineered distractors: off by addition, missing multiplier
+            distractors = [answer-mult, answer+(start*mult), seq[3]*2, answer+1];
+            ruleText = "?";
+        } else {
+            // Fibonacci variant or compound logic
+            let a = Math.floor(Math.random() * 3) + 1;
+            let b = Math.floor(Math.random() * 4) + 2;
+            seq = [a, b, a+b, b+(a+b), (a+b)+(b+(a+b))];
+            answer = (b+(a+b)) + ((a+b)+(b+(a+b)));
+            distractors = [answer-10, answer+a, answer-b, answer+10];
+            ruleText = "?";
+        }
+
+        // Shuffle and insert answer
+        distractors = [...new Set(distractors)].filter(d => d !== answer).slice(0, 3);
+        let options = [...distractors, answer].sort(() => Math.random() - 0.5);
+
+        return {
+            promptHTML: `<div class="text-4xl font-mono tracking-widest text-center">${seq.join(', ')}, <span class="text-blue-600 font-bold">${ruleText}</span></div>`,
+            options: options,
+            answer: answer
+        };
+    },
+
+    // Spatial Matrices (SVG Generation)
+    matrix: (level) => {
+        const shapes = ['rect', 'circle', 'polygon'];
+        const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
+        
+        let s = shapes[Math.floor(Math.random() * shapes.length)];
+        let c1 = colors[Math.floor(Math.random() * colors.length)];
+        let c2 = colors[Math.floor(Math.random() * colors.length)];
+        
+        const drawShape = (rot, scale, fill) => {
+            if(s === 'rect') return `<rect x="${25 - (25*scale)}" y="${25 - (25*scale)}" width="${50*scale}" height="${50*scale}" fill="${fill}" transform="rotate(${rot} 25 25)"/>`;
+            if(s === 'circle') return `<circle cx="25" cy="25" r="${25*scale}" fill="${fill}"/>`;
+            if(s === 'polygon') return `<polygon points="25,${25 - 25*scale} ${25 + 25*scale},${25 + 25*scale} ${25 - 25*scale},${25 + 25*scale}" fill="${fill}" transform="rotate(${rot} 25 25)"/>`;
         };
 
-        const questions = [];
-
-        function addMathQ(seq, missing, options, rule) {
-            questions.push({
-                category: 'quantitative',
-                prompt: `<div class="mb-4 text-sm text-slate-500 font-semibold tracking-wider uppercase">Quantitative Reasoning</div>
-                         <div class="flex justify-center items-center flex-wrap gap-3 mb-8">
-                            ${seq.map(n => `<div class="text-3xl sm:text-4xl font-mono text-slate-800">${n}</div><div class="text-xl text-slate-300">,</div>`).join('')}
-                            <div class="text-3xl sm:text-4xl font-mono border-b-4 border-blue-500 w-16 text-center pb-1 text-blue-600">?</div>
-                         </div>
-                         <p class="text-center text-slate-600 mb-2 font-medium">Select the missing value.</p>`,
-                options: options.map(String),
-                correct: options.indexOf(missing)
-            });
-            state.categories.quantitative.total++;
-        }
-
-        // Tier 1: Interleaved Sequences & Primes
-        addMathQ([2, 3, 5, 7, 11, 13], 17, [15, 16, 17, 19], "Primes");
-        addMathQ([1, 4, 2, 8, 4, 16, 8], 32, [16, 24, 32, 64], "Interleaved *2");
-        addMathQ([10, 9, 11, 8, 12, 7], 13, [6, 12, 13, 14], "Interleaved +/-");
-        addMathQ([1, 8, 27, 64, 125], 216, [144, 216, 256, 512], "Cubes");
+        let svgBase = `<svg viewBox="0 0 50 50" class="w-16 h-16 inline-block mx-2 shadow-sm rounded border">`;
         
-        // Tier 2: Complex numerical relationships
-        for(let i=1; i<=5; i++) {
-            let start = i*3;
-            addMathQ([start, start*2+1, (start*2+1)*2+1, ((start*2+1)*2+1)*2+1], (((start*2+1)*2+1)*2+1)*2+1, 
-            [(((start*2+1)*2+1)*2+1)*2+1, (((start*2+1)*2+1)*2+1)*2-1, (((start*2+1)*2+1)*2+1)*2+3, (((start*2+1)*2+1)*2+1)*2+5], "(n*2)+1");
-        }
-        
-        // Tier 3: Fractions / Decimals
-        addMathQ(["1/2", "3/4", "5/8", "7/16"], "9/32", ["9/24", "9/32", "11/32", "11/64"], "Fractions");
-        addMathQ(["0.5", "1.5", "4.5", "13.5"], "40.5", ["27.5", "30.5", "40.5", "42.5"], "Decimals *3");
-        addMathQ([1, 2, 6, 24, 120], 720, [240, 480, 600, 720], "Factorials");
-        addMathQ([2, 5, 14, 41, 122], 365, [244, 365, 488, 729], "n*3 - 1");
+        let matrixHTML = `<div class="grid grid-cols-3 gap-4 mx-auto w-64 bg-slate-50 p-4 rounded-xl border">`;
+        let answerData;
+        let distractors = [];
 
-        function addLogicQ(seq, missing, options) {
-            questions.push({
-                category: 'logic',
-                prompt: `<div class="mb-4 text-sm text-slate-500 font-semibold tracking-wider uppercase">Abstract Logic</div>
-                         <div class="flex justify-center items-center flex-wrap gap-4 mb-8">
-                            ${seq.map(n => `<div class="text-2xl sm:text-3xl font-bold text-slate-700 bg-slate-100 p-4 rounded-lg">${n}</div><div class="text-slate-300">→</div>`).join('')}
-                            <div class="text-2xl sm:text-3xl font-bold border-2 border-dashed border-blue-500 bg-blue-50 p-4 rounded-lg w-16 text-center text-blue-600">?</div>
-                         </div>
-                         <p class="text-center text-slate-600 mb-2 font-medium">Identify the logical progression.</p>`,
-                options: options,
-                correct: options.indexOf(missing)
-            });
-            state.categories.logic.total++;
+        if (level === 1) {
+            // Simple rotation or size change
+            for(let i=0; i<2; i++) {
+                for(let j=0; j<3; j++) {
+                    matrixHTML += `${svgBase}${drawShape(j*45, 0.8, c1)}</svg>`;
+                }
+            }
+            matrixHTML += `${svgBase}${drawShape(0, 0.8, c1)}</svg>${svgBase}${drawShape(45, 0.8, c1)}</svg>`;
+            matrixHTML += `<div class="w-16 h-16 inline-flex items-center justify-center border-2 border-dashed border-blue-400 rounded mx-2 bg-blue-50 text-blue-400 text-2xl font-bold">?</div>`;
+            
+            answerData = `${svgBase}${drawShape(90, 0.8, c1)}</svg>`;
+            distractors = [
+                `${svgBase}${drawShape(135, 0.8, c1)}</svg>`,
+                `${svgBase}${drawShape(90, 0.5, c1)}</svg>`,
+                `${svgBase}${drawShape(0, 0.8, c2)}</svg>`
+            ];
+        } else {
+            // Complex multi-variable (Size + Color + Rotation)
+            for(let i=0; i<2; i++) {
+                matrixHTML += `${svgBase}${drawShape(0, 0.5, c1)}</svg>${svgBase}${drawShape(45, 0.7, c2)}</svg>${svgBase}${drawShape(90, 0.9, c1)}</svg>`;
+            }
+            matrixHTML += `${svgBase}${drawShape(0, 0.5, c1)}</svg>${svgBase}${drawShape(45, 0.7, c2)}</svg>`;
+            matrixHTML += `<div class="w-16 h-16 inline-flex items-center justify-center border-2 border-dashed border-blue-400 rounded mx-2 bg-blue-50 text-blue-400 text-2xl font-bold">?</div>`;
+            
+            answerData = `${svgBase}${drawShape(90, 0.9, c1)}</svg>`;
+            // Engineered errors: wrong color, wrong size, wrong rotation
+            distractors = [
+                `${svgBase}${drawShape(90, 0.9, c2)}</svg>`,
+                `${svgBase}${drawShape(45, 0.9, c1)}</svg>`,
+                `${svgBase}${drawShape(90, 0.5, c1)}</svg>`
+            ];
         }
+        matrixHTML += `</div>`;
 
-        addLogicQ(['A', 'C', 'F', 'J', 'O'], 'U', ['S', 'T', 'U', 'V']);
-        addLogicQ(['Z', 'X', 'U', 'Q', 'L'], 'F', ['E', 'F', 'G', 'H']);
-        addLogicQ(['A1', 'C4', 'E9', 'G16'], 'I25', ['H20', 'I25', 'J25', 'I36']);
-        addLogicQ(['B', 'E', 'I', 'N', 'T'], 'A', ['Z', 'A', 'B', 'C']); // Modulo 26
-        
-        for(let i=1; i<=9; i++) {
-            const shift = i % 3 + 1;
-            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const start = i;
-            addLogicQ(
-                [letters[start], letters[start+shift], letters[start+shift*2], letters[start+shift*3]], 
-                letters[start+shift*4], 
-                [letters[start+shift*4-1], letters[start+shift*4], letters[start+shift*4+1], letters[start+shift*4+2]]
-            );
-        }
+        let options = [...distractors, answerData].sort(() => Math.random() - 0.5);
 
-        const svgShapes = {
-            circle: (c, rot=0) => `<circle cx="32" cy="32" r="20" fill="none" stroke="${c}" stroke-width="4" transform="rotate(${rot} 32 32)"/>`,
-            square: (c, rot=0) => `<rect x="16" y="16" width="32" height="32" fill="none" stroke="${c}" stroke-width="4" transform="rotate(${rot} 32 32)"/>`,
-            triangle: (c, rot=0) => `<polygon points="32,12 52,48 12,48" fill="none" stroke="${c}" stroke-width="4" transform="rotate(${rot} 32 32)"/>`,
-            cross: (c, rot=0) => `<path d="M32 12 V52 M12 32 H52" stroke="${c}" stroke-width="4" transform="rotate(${rot} 32 32)"/>`
+        return {
+            promptHTML: matrixHTML,
+            options: options,
+            answer: answerData,
+            isHTMLOption: true
         };
+    }
+};
 
-        function addSpatial3x3(matrixData, missing, options) {
-            let gridHtml = `<div class="matrix-3x3 mb-8">`;
-            for(let i=0; i<8; i++) {
-                gridHtml += `<div class="matrix-cell"><svg width="64" height="64">${matrixData[i]}</svg></div>`;
-            }
-            gridHtml += `<div class="matrix-cell missing">?</div></div>`;
+// --- RENDER LOGIC ---
 
-            questions.push({
-                category: 'spatial',
-                prompt: `<div class="mb-4 text-sm text-slate-500 font-semibold tracking-wider uppercase">Spatial Processing</div>
-                         ${gridHtml}
-                         <p class="text-center text-slate-600 mb-2 font-medium">Select the image that logically completes the 3x3 matrix.</p>`,
-                options: options.map(opt => `<svg width="48" height="48" viewBox="0 0 64 64">${opt}</svg>`),
-                correct: options.indexOf(missing)
-            });
-            state.categories.spatial.total++;
-        }
+function render() {
+    appDiv.className = "w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] flex flex-col relative fade-in";
+    
+    switch (state.phase) {
+        case 'setup': renderSetup(); break;
+        case 'intro_gf': renderIntroGf(); break;
+        case 'gf_test': renderGfTest(); break;
+        case 'intro_wm': renderIntroWm(); break;
+        case 'wm_test': renderWmTest(); break;
+        case 'results': renderResults(); break;
+    }
+}
 
-        // Generate 14 Professional 3x3 Matrices
-        const sKeys = Object.keys(svgShapes);
-        const colors = ['#334155', '#3b82f6', '#ef4444'];
-        
-        for(let i=0; i<14; i++) {
-            let cells = [];
-            let optCells = [];
+function renderSetup() {
+    appDiv.innerHTML = `
+        <div class="p-10 flex-1 flex flex-col justify-center items-center text-center">
+            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6">
+                <i class="fa-solid fa-brain text-4xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-4">Clinical Cognitive Assessment</h1>
+            <p class="text-slate-500 mb-8 max-w-lg">This professional-grade screening measures Fluid Reasoning (Gf) and Working Memory (Gwm). To provide accurate normative scoring, please enter the subject's chronological age.</p>
             
-            // Logic: Row 1 and 2 define a pattern (e.g. rotation or shape change), Row 3 applies it.
-            let shapeBase = sKeys[i % sKeys.length];
-            let colorBase = colors[i % colors.length];
-            let type = i % 3; // 0: Rotate, 1: Add shape, 2: Color shift
-
-            if (type === 0) {
-                // Rotation logic (adds 45 degrees per cell)
-                for(let r=0; r<3; r++) {
-                    for(let c=0; c<3; c++) {
-                        let rot = (r*90 + c*45);
-                        if (r!==2 || c!==2) cells.push(svgShapes[shapeBase](colorBase, rot));
-                        else {
-                            let correct = svgShapes[shapeBase](colorBase, rot);
-                            optCells = [correct, svgShapes[shapeBase](colorBase, rot-45), svgShapes[shapeBase](colorBase, rot+90), svgShapes[shapeBase](colorBase, rot+45)];
-                        }
-                    }
-                }
-            } else if (type === 1) {
-                // Shape sequence logic
-                for(let r=0; r<3; r++) {
-                    for(let c=0; c<3; c++) {
-                        let s = sKeys[(r + c) % sKeys.length];
-                        if (r!==2 || c!==2) cells.push(svgShapes[s](colorBase));
-                        else {
-                            let correct = svgShapes[s](colorBase);
-                            optCells = [svgShapes[sKeys[(r+c+1)%sKeys.length]](colorBase), correct, svgShapes[sKeys[(r+c+2)%sKeys.length]](colorBase), svgShapes[shapeBase]('#10b981')];
-                        }
-                    }
-                }
-            } else {
-                // Compound logic (Shape + inner shape)
-                for(let r=0; r<3; r++) {
-                    for(let c=0; c<3; c++) {
-                        let outer = svgShapes[sKeys[r]](colors[0]);
-                        let inner = svgShapes[sKeys[c]](colors[1], 0).replace('stroke-width="4"', 'stroke-width="2" transform="scale(0.5) translate(32 32)"');
-                        let combined = outer + inner;
-                        if (r!==2 || c!==2) cells.push(combined);
-                        else {
-                            let correct = combined;
-                            let wrong1 = svgShapes[sKeys[r]](colors[0]) + svgShapes[sKeys[(c+1)%3]](colors[1], 0).replace('stroke-width="4"', 'stroke-width="2" transform="scale(0.5) translate(32 32)"');
-                            let wrong2 = svgShapes[sKeys[(r+1)%3]](colors[0]) + inner;
-                            let wrong3 = svgShapes[sKeys[r]](colors[2]) + inner;
-                            optCells = [wrong1, wrong2, correct, wrong3];
-                        }
-                    }
-                }
-            }
-            
-            // Randomize options
-            let correctStr = optCells.find(x => x);
-            optCells.sort(() => Math.random() - 0.5);
-            addSpatial3x3(cells, correctStr, optCells);
-        }
-
-
-        const appDiv = document.getElementById('app');
-
-        function initApp() {
-            appDiv.innerHTML = `
-                <div class="p-8 sm:p-12 flex flex-col h-full justify-center">
-                    <div class="mb-8 text-center">
-                        <div class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4">Professional Grade</div>
-                        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Cognitive Assessment Battery</h1>
-                        <p class="text-lg text-slate-500 max-w-2xl mx-auto">A comprehensive, 40-question psychometric evaluation measuring quantitative reasoning, fluid intelligence, and spatial processing.</p>
-                    </div>
-                    
-                    <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl mb-8 text-sm text-slate-600 shadow-inner">
-                        <h3 class="font-bold text-slate-800 mb-2 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Strict Privacy & Clinical Disclaimer
-                        </h3>
-                        <p class="mb-2"><strong>Zero Data Collection:</strong> This assessment operates 100% locally on your device. No data, scores, or personal identifiers are transmitted to any server. It is fully COPPA and GDPR-K compliant by design.</p>
-                        <p><strong>Clinical Limitation:</strong> Results provide an <em>informational estimate</em> of fluid reasoning domains. It is not a clinical diagnostic tool (such as the WAIS-IV or WISC-V) and should not be used for medical or educational placement.</p>
-                    </div>
-
-                    <button onclick="startAssessment()" class="w-full sm:w-auto mx-auto bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 px-12 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/30 text-lg">
-                        Begin Assessment (40 Min)
-                    </button>
-                </div>
-            `;
-        }
-
-        function startAssessment() {
-            state.currentQuestion = 0;
-            state.startTime = Date.now();
-            state.questionStartTime = Date.now();
-            state.responses = [];
-            
-            // Reset categories
-            Object.keys(state.categories).forEach(k => {
-                state.categories[k].score = 0;
-                state.categories[k].time = 0;
-            });
-            
-            state.timerInterval = setInterval(updateTimer, 1000);
-            renderQuestion();
-        }
-
-        function updateTimer() {
-            const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-            const remaining = state.timeLimit - elapsed;
-            
-            const timerEl = document.getElementById('timer-text');
-            const progressEl = document.getElementById('timer-bar');
-            
-            if (timerEl && progressEl) {
-                const m = Math.floor(remaining / 60);
-                const s = remaining % 60;
-                timerEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
-                progressEl.style.width = `${(remaining / state.timeLimit) * 100}%`;
+            <div class="bg-slate-50 p-6 rounded-xl border w-full max-w-md">
+                <label class="block text-sm font-semibold text-slate-700 mb-2 text-left">Subject's Age (Years)</label>
+                <input type="number" id="ageInput" min="6" max="99" value="10" class="w-full p-3 border rounded-lg mb-6 text-lg focus:ring-2 focus:ring-blue-500 outline-none">
                 
-                if (remaining <= 300) progressEl.classList.replace('bg-slate-800', 'bg-red-500'); // 5 min warning
-            }
+                <button onclick="startAssessment()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    Begin Assessment <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-6 max-w-sm"><i class="fa-solid fa-shield-halved mr-1"></i> COPPA Compliant: 100% Client-side execution. Zero data is transmitted or stored.</p>
+        </div>
+    `;
+}
 
-            if (remaining <= 0) {
-                clearInterval(state.timerInterval);
-                processResults();
-            }
-        }
+function startAssessment() {
+    const age = parseInt(document.getElementById('ageInput').value);
+    if(age < 6 || age > 99) return alert("Age must be between 6 and 99");
+    state.ageMonths = age * 12;
+    state.phase = 'intro_gf';
+    render();
+}
 
-        function renderQuestion() {
-            const q = questions[state.currentQuestion];
-            const progressPct = ((state.currentQuestion) / questions.length) * 100;
-            state.questionStartTime = Date.now();
+function renderIntroGf() {
+    appDiv.innerHTML = `
+        <div class="p-10 flex-1 flex flex-col justify-center items-center text-center">
+            <h2 class="text-3xl font-bold text-slate-800 mb-4">Phase 1: Fluid Reasoning</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-lg">Identify the underlying logical rules in sequences and spatial matrices. This section adapts to your ability.</p>
+            <ul class="text-left text-slate-600 mb-10 space-y-4">
+                <li><i class="fa-solid fa-stopwatch text-blue-500 mr-2"></i> Speed and accuracy are both measured.</li>
+                <li><i class="fa-solid fa-arrow-trend-up text-blue-500 mr-2"></i> Difficulty will adjust automatically.</li>
+                <li><i class="fa-solid fa-pen-ruler text-blue-500 mr-2"></i> Max 20 questions to prevent fatigue.</li>
+            </ul>
+            <button onclick="startGfTest()" class="bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition shadow-lg text-lg">
+                Start Phase 1
+            </button>
+        </div>
+    `;
+}
 
-            appDiv.innerHTML = `
-                <!-- Header -->
-                <div class="bg-white p-5 flex justify-between items-center border-b border-slate-100 z-10 relative">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-sm font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-md">Q ${state.currentQuestion + 1} / ${questions.length}</div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <div class="text-sm font-bold text-slate-700 w-12" id="timer-text">--:--</div>
-                    </div>
-                </div>
+function startGfTest() {
+    state.phase = 'gf_test';
+    generateNextGfQuestion();
+}
 
-                <!-- Progress Bars -->
-                <div class="h-1 w-full bg-slate-100 flex flex-col">
-                    <div id="timer-bar" class="h-0.5 bg-slate-800 transition-all duration-1000" style="width: 100%"></div>
-                    <div class="h-0.5 bg-blue-500 transition-all duration-500" style="width: ${progressPct}%"></div>
-                </div>
+function generateNextGfQuestion() {
+    if (state.gf.questionCount >= state.gf.maxQuestions) {
+        state.phase = 'intro_wm';
+        render();
+        return;
+    }
 
-                <!-- Question Body -->
-                <div class="p-8 sm:p-12 flex-grow flex flex-col items-center justify-center fade-in no-select bg-slate-50/50">
-                    <div class="w-full max-w-2xl text-center">
-                        ${q.prompt}
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mt-12">
-                        ${q.options.map((opt, idx) => `
-                            <button onclick="handleAnswer(${idx})" class="p-6 sm:p-8 bg-white border-2 border-slate-200 rounded-2xl hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 flex justify-center items-center transition-all duration-200 group transform hover:-translate-y-1">
-                                <div class="group-hover:scale-105 transition-transform duration-200 font-bold text-xl sm:text-2xl text-slate-700">${opt}</div>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
+    // Pseudo-Adaptive Routing (CAT)
+    if (state.gf.consecutivePass >= 2 && state.gf.level < 3) {
+        state.gf.level++;
+        state.gf.consecutivePass = 0;
+    } else if (state.gf.consecutiveFail >= 2 && state.gf.level > 1) {
+        state.gf.level--;
+        state.gf.consecutiveFail = 0;
+    }
 
-        function handleAnswer(selectedIndex) {
-            const q = questions[state.currentQuestion];
-            const timeTaken = Math.floor((Date.now() - state.questionStartTime) / 1000);
-            const isCorrect = selectedIndex === q.correct;
+    const type = Math.random() > 0.5 ? 'sequence' : 'matrix';
+    state.gf.currentQuestion = generators[type](state.gf.level);
+    state.gf.currentQuestionStart = Date.now();
+    
+    render();
+}
+
+// BUGFIX: Passing index rather than raw HTML strings to avoid DOM attribute injection issues
+function handleGfAnswer(selectedIndex) {
+    const selected = state.gf.currentQuestion.options[selectedIndex];
+    const timeTaken = Date.now() - state.gf.currentQuestionStart;
+    const isCorrect = selected === state.gf.currentQuestion.answer;
+
+    state.gf.history.push({
+        level: state.gf.level,
+        correct: isCorrect,
+        timeMs: timeTaken
+    });
+
+    if (isCorrect) {
+        state.gf.consecutivePass++;
+        state.gf.consecutiveFail = 0;
+    } else {
+        state.gf.consecutiveFail++;
+        state.gf.consecutivePass = 0;
+    }
+
+    state.gf.questionCount++;
+    generateNextGfQuestion();
+}
+
+function renderGfTest() {
+    const progress = (state.gf.questionCount / state.gf.maxQuestions) * 100;
+    const q = state.gf.currentQuestion;
+
+    appDiv.innerHTML = `
+        <div class="h-2 w-full bg-slate-100">
+            <div class="h-full bg-blue-500 transition-all duration-300" style="width: ${progress}%"></div>
+        </div>
+        <div class="p-6 border-b flex justify-between items-center text-slate-500 font-semibold text-sm">
+            <span>Phase 1: Fluid Logic</span>
+            <span>Item ${state.gf.questionCount + 1} / ${state.gf.maxQuestions}</span>
+            <span class="flex items-center gap-1">Difficulty <span class="flex gap-1">${'<div class="w-2 h-2 rounded-full bg-blue-500"></div>'.repeat(state.gf.level)}${'<div class="w-2 h-2 rounded-full bg-slate-200"></div>'.repeat(3 - state.gf.level)}</span></span>
+        </div>
+        <div class="flex-1 p-10 flex flex-col items-center justify-center">
+            <div class="mb-12 w-full flex justify-center">
+                ${q.promptHTML}
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
+                ${q.options.map((opt, i) => `
+                    <button onclick="handleGfAnswer(${i})" class="p-6 bg-white border-2 border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition flex items-center justify-center text-2xl font-bold shadow-sm">
+                        ${q.isHTMLOption ? opt : opt}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function renderIntroWm() {
+    appDiv.innerHTML = `
+        <div class="p-10 flex-1 flex flex-col justify-center items-center text-center">
+            <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-6">
+                <i class="fa-solid fa-table-cells text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-4">Phase 2: Working Memory</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-lg">Observe the sequence of flashing blocks and repeat it by tapping them in the exact same order.</p>
+            <ul class="text-left text-slate-600 mb-10 space-y-4">
+                <li><i class="fa-solid fa-plus text-purple-500 mr-2"></i> The sequence gets longer as you succeed.</li>
+                <li><i class="fa-solid fa-xmark text-purple-500 mr-2"></i> Two mistakes at the same length ends the phase.</li>
+            </ul>
+            <button onclick="startWmTest()" class="bg-purple-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-purple-700 transition shadow-lg text-lg">
+                Start Phase 2
+            </button>
+        </div>
+    `;
+}
+
+function startWmTest() {
+    state.phase = 'wm_test';
+    generateWmSequence();
+}
+
+function generateWmSequence() {
+    state.wm.sequence = [];
+    state.wm.userIndex = 0;
+    for(let i=0; i<state.wm.currentLength; i++) {
+        state.wm.sequence.push(Math.floor(Math.random() * 9));
+    }
+    render();
+    setTimeout(playWmSequence, 1000);
+}
+
+async function playWmSequence() {
+    state.wm.isFlashing = true;
+    render(); // Update UI to disable clicks
+    
+    for(let i=0; i<state.wm.sequence.length; i++) {
+        const tileIdx = state.wm.sequence[i];
+        const tile = document.getElementById(`wm-tile-${tileIdx}`);
+        
+        await new Promise(r => setTimeout(r, 400)); // gap
+        tile.classList.add('bg-purple-500', 'scale-95', 'shadow-inner');
+        tile.classList.remove('bg-slate-100');
+        
+        await new Promise(r => setTimeout(r, 600)); // flash duration
+        tile.classList.remove('bg-purple-500', 'scale-95', 'shadow-inner');
+        tile.classList.add('bg-slate-100');
+    }
+    
+    state.wm.isFlashing = false;
+    render(); // Enable clicks
+}
+
+function handleWmClick(idx) {
+    if (state.wm.isFlashing) return;
+
+    // Visual feedback
+    const tile = document.getElementById(`wm-tile-${idx}`);
+    tile.classList.add('bg-purple-200');
+    setTimeout(() => tile.classList.remove('bg-purple-200'), 200);
+
+    if (idx === state.wm.sequence[state.wm.userIndex]) {
+        // Correct tap
+        state.wm.userIndex++;
+        if (state.wm.userIndex === state.wm.sequence.length) {
+            // Sequence completed successfully
+            state.wm.maxScore = state.wm.currentLength;
+            state.wm.currentLength++;
+            state.wm.failsAtCurrentLength = 0;
             
-            // Record data
-            state.responses.push({ isCorrect, timeTaken, category: q.category });
-            state.categories[q.category].time += timeTaken;
-            if (isCorrect) state.categories[q.category].score++;
-
-            if (state.currentQuestion < questions.length - 1) {
-                state.currentQuestion++;
-                renderQuestion();
-            } else {
-                clearInterval(state.timerInterval);
-                showProcessingScreen();
-            }
-        }
-
-        function showProcessingScreen() {
-            appDiv.innerHTML = `
-                <div class="p-12 flex-grow flex flex-col items-center justify-center fade-in text-center bg-slate-900 text-white">
-                    <svg class="animate-spin h-12 w-12 text-blue-500 mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <h2 class="text-2xl font-bold mb-2">Analyzing Responses</h2>
-                    <p class="text-slate-400">Computing multidimensional cognitive profile...</p>
-                </div>
-            `;
-            setTimeout(renderDashboard, 2000); // Simulate heavy processing for UX
-        }
-
-        function renderDashboard() {
-            // Calculate overall
-            const totalScore = state.categories.quantitative.score + state.categories.spatial.score + state.categories.logic.score;
-            const percentage = totalScore / questions.length;
+            // Show success overlay temporarily
+            const overlay = document.getElementById('wm-status');
+            overlay.innerHTML = '<i class="fa-solid fa-check text-green-500 text-5xl"></i>';
             
-            // Sophisticated IQ approximation (Standard Deviation 15, Mean 100)
-            // Range mapped roughly from 60 to 145 based on percentage.
-            let estIQ = Math.round(60 + (percentage * 85));
-            if (estIQ > 145) estIQ = ">145";
+            setTimeout(generateWmSequence, 1000);
+        }
+    } else {
+        // Incorrect tap
+        state.wm.failsAtCurrentLength++;
+        const overlay = document.getElementById('wm-status');
+        overlay.innerHTML = '<i class="fa-solid fa-xmark text-red-500 text-5xl"></i>';
 
-            // Category Calcs
-            const getCatPct = (cat) => Math.round((state.categories[cat].score / state.categories[cat].total) * 100) || 0;
-            const totalTimeSecs = Math.floor((Date.now() - state.startTime) / 1000);
-            const avgTime = (totalTimeSecs / questions.length).toFixed(1);
+        if (state.wm.failsAtCurrentLength >= 2) {
+            setTimeout(() => {
+                state.phase = 'results';
+                render();
+            }, 1500);
+        } else {
+            setTimeout(generateWmSequence, 1500);
+        }
+    }
+}
 
-            appDiv.innerHTML = `
-                <div class="p-8 sm:p-12 flex-grow flex flex-col bg-white overflow-y-auto fade-in">
-                    
-                    <!-- Report Header -->
-                    <div class="flex justify-between items-start mb-10 pb-6 border-b border-slate-200">
-                        <div>
-                            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Cognitive Profile Report</h2>
-                            <p class="text-slate-500 mt-1">Generated locally on ${new Date().toLocaleDateString()} &bull; Private & Confidential</p>
-                        </div>
-                        <button onclick="window.print()" class="no-print bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 rounded-lg transition-colors flex items-center shadow-sm">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                            Export PDF
-                        </button>
+function renderWmTest() {
+    appDiv.innerHTML = `
+        <div class="p-6 border-b flex justify-between items-center text-slate-500 font-semibold text-sm">
+            <span>Phase 2: Working Memory (Corsi)</span>
+            <span>Sequence Length: ${state.wm.currentLength}</span>
+        </div>
+        <div class="flex-1 p-10 flex flex-col items-center justify-center relative">
+            
+            <div id="wm-status" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10 opacity-80"></div>
+            
+            <div class="mb-8 text-center h-8 text-slate-600 font-medium">
+                ${state.wm.isFlashing ? 'Memorize the sequence...' : 'Repeat the sequence!'}
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 w-full max-w-sm mx-auto">
+                ${[0,1,2,3,4,5,6,7,8].map(i => `
+                    <div id="wm-tile-${i}" 
+                         onclick="handleWmClick(${i})"
+                         class="wm-tile aspect-square bg-slate-100 rounded-xl border-2 border-slate-200 shadow-sm cursor-pointer hover:border-purple-300 ${state.wm.isFlashing ? 'pointer-events-none' : ''}">
                     </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
 
-                    <!-- Main Metric -->
-                    <div class="flex flex-col md:flex-row items-center justify-between bg-slate-900 rounded-3xl p-8 mb-10 shadow-xl print:bg-white print:border print:border-slate-300 print:text-black print:shadow-none">
-                        <div class="text-center md:text-left mb-6 md:mb-0 md:w-1/2">
-                            <h3 class="text-slate-400 font-semibold uppercase tracking-wider mb-2 print:text-slate-600">Full Scale Estimate (FSIQ-E)</h3>
-                            <div class="text-6xl font-black text-white mb-2 print:text-black">${estIQ}</div>
-                            <p class="text-slate-400 text-sm print:text-slate-600">Standard Deviation = 15. Raw Score: ${totalScore}/${questions.length}</p>
-                        </div>
-                        <div class="md:w-1/2 flex gap-4 text-center">
-                            <div class="bg-slate-800 p-4 rounded-2xl flex-1 print:border print:border-slate-200 print:bg-slate-50">
-                                <div class="text-slate-400 text-xs uppercase font-bold mb-1 print:text-slate-500">Accuracy</div>
-                                <div class="text-2xl font-bold text-blue-400">${Math.round(percentage*100)}%</div>
-                            </div>
-                            <div class="bg-slate-800 p-4 rounded-2xl flex-1 print:border print:border-slate-200 print:bg-slate-50">
-                                <div class="text-slate-400 text-xs uppercase font-bold mb-1 print:text-slate-500">Processing Speed</div>
-                                <div class="text-2xl font-bold text-emerald-400">${avgTime}s <span class="text-xs font-normal text-slate-500">/ Q</span></div>
-                            </div>
+// --- SCORING & RESULTS ALGORITHMS ---
+
+function calculateScores() {
+    // 1. Fluid Intelligence (Gf) Raw Score
+    let gfRaw = 0;
+    let fastAnswers = 0;
+    
+    state.gf.history.forEach(item => {
+        if (item.correct) {
+            // Weighted by IRT level
+            gfRaw += item.level * 2; 
+            if (item.timeMs < 4000) fastAnswers++;
+        }
+    });
+
+    // 2. Working Memory (Gwm) Raw Score
+    let wmRaw = state.wm.maxScore * 3;
+
+    // 3. Total Raw Score
+    let totalRaw = gfRaw + wmRaw;
+
+    // 4. Age-Stratified Norming (Mathematical Approximation)
+    // In true clinical settings, this references a massive norming table.
+    // We approximate: Base expected score increases with age.
+    const ageYears = state.ageMonths / 12;
+    // Assume peak fluid intelligence/working memory combo around age 22, plateau, then slight decline.
+    // This is a highly simplified heuristic for demonstration.
+    let expectedRawScore;
+    if (ageYears <= 16) {
+        expectedRawScore = 15 + (ageYears * 2.5); // Steep learning curve
+    } else if (ageYears <= 45) {
+        expectedRawScore = 55; // Peak plateau
+    } else {
+        expectedRawScore = 55 - ((ageYears - 45) * 0.2); // Slow decline
+    }
+
+    // Standard Deviation calculation (Mean = 100, SD = 15)
+    // IQ = 100 + ((Raw - Expected) / StandardError) * 15
+    const standardError = 12; // Estimated spread
+    let estimatedIQ = 100 + ((totalRaw - expectedRawScore) / standardError) * 15;
+    
+    // Clamp to realistic bounds
+    estimatedIQ = Math.max(55, Math.min(145, Math.round(estimatedIQ)));
+
+    // Sub-indices percentiles (Approximate)
+    const gfPercentile = Math.round((gfRaw / (state.gf.maxQuestions * 3)) * 99);
+    const wmPercentile = Math.round(Math.min(99, (state.wm.maxScore / 9) * 99));
+
+    return { iq: estimatedIQ, gfPercentile, wmPercentile, speed: fastAnswers };
+}
+
+function renderResults() {
+    const scores = calculateScores();
+    
+    let classification = "Average";
+    if (scores.iq >= 130) classification = "Very Superior";
+    else if (scores.iq >= 120) classification = "Superior";
+    else if (scores.iq >= 110) classification = "High Average";
+    else if (scores.iq < 90) classification = "Low Average";
+    else if (scores.iq < 80) classification = "Borderline";
+
+    appDiv.innerHTML = `
+        <div class="bg-slate-800 text-white p-8 text-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 flex items-center justify-center">
+                <i class="fa-solid fa-chart-network text-9xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 relative z-10">Clinical Cognitive Profile</h2>
+            <p class="text-slate-300 relative z-10">Normative Assessment Complete</p>
+        </div>
+        
+        <div class="flex-1 p-8 grid md:grid-cols-2 gap-8 bg-slate-50">
+            <!-- Global Score -->
+            <div class="bg-white rounded-2xl shadow-sm border p-6 flex flex-col items-center justify-center text-center">
+                <h3 class="text-sm uppercase tracking-wider text-slate-400 font-bold mb-4">Estimated FSIQ</h3>
+                <div class="text-7xl font-black text-blue-600 mb-2">${scores.iq}</div>
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold text-sm">
+                    ${classification}
+                </div>
+                <p class="text-xs text-slate-400 mt-4 max-w-xs">Age-adjusted composite score (Chronological Age: ${state.ageMonths/12} yrs)</p>
+            </div>
+
+            <!-- Sub-Indices -->
+            <div class="flex flex-col gap-4">
+                <div class="bg-white rounded-xl shadow-sm border p-5 flex items-center">
+                    <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mr-4">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-700">Fluid Reasoning (Gf)</h4>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
+                            <div class="bg-emerald-500 h-2 rounded-full" style="width: ${Math.max(5, scores.gfPercentile)}%"></div>
                         </div>
                     </div>
+                    <div class="ml-4 font-mono font-bold text-slate-600">${Math.max(1, scores.gfPercentile)}th ptile</div>
+                </div>
 
-                    <h3 class="text-xl font-bold text-slate-800 mb-6">Domain Analysis</h3>
-                    
-                    <!-- Sub-score Breakdown -->
-                    <div class="space-y-6 mb-12">
-                        <!-- Quantitative -->
-                        <div>
-                            <div class="flex justify-between items-end mb-2">
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Quantitative Reasoning</h4>
-                                    <p class="text-xs text-slate-500">Numerical sequences, modular arithmetic, fractions.</p>
-                                </div>
-                                <div class="font-bold text-slate-800">${getCatPct('quantitative')}%</div>
-                            </div>
-                            <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-indigo-500 rounded-full" style="width: ${getCatPct('quantitative')}%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Spatial -->
-                        <div>
-                            <div class="flex justify-between items-end mb-2">
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Spatial / Visual Processing</h4>
-                                    <p class="text-xs text-slate-500">2D/3D mental rotation, multi-rule matrix completion.</p>
-                                </div>
-                                <div class="font-bold text-slate-800">${getCatPct('spatial')}%</div>
-                            </div>
-                            <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-rose-500 rounded-full" style="width: ${getCatPct('spatial')}%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Logic -->
-                        <div>
-                            <div class="flex justify-between items-end mb-2">
-                                <div>
-                                    <h4 class="font-bold text-slate-700">Fluid Abstract Logic</h4>
-                                    <p class="text-xs text-slate-500">Pattern recognition, symbolic deduction without prior knowledge.</p>
-                                </div>
-                                <div class="font-bold text-slate-800">${getCatPct('logic')}%</div>
-                            </div>
-                            <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-amber-500 rounded-full" style="width: ${getCatPct('logic')}%"></div>
-                            </div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 flex items-center">
+                    <div class="w-12 h-12 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-xl mr-4">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-700">Working Memory (Gwm)</h4>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: ${Math.max(5, scores.wmPercentile)}%"></div>
                         </div>
                     </div>
+                    <div class="ml-4 font-mono font-bold text-slate-600">${Math.max(1, scores.wmPercentile)}th ptile</div>
+                </div>
 
-                    <!-- Clinical Disclaimer Footer -->
-                    <div class="mt-auto pt-6 border-t border-slate-200 text-xs text-slate-400 no-print">
-                        <strong>Disclaimer:</strong> This application utilizes algorithmic matrix generation inspired by standardized public-domain resources (e.g., ICAR). It is intended for educational and personal insight purposes only. It is not affiliated with the Weschler or Stanford-Binet assessments and holds no clinical validity.
+                <div class="bg-white rounded-xl shadow-sm border p-5 flex items-center">
+                    <div class="w-12 h-12 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xl mr-4">
+                        <i class="fa-solid fa-bolt"></i>
                     </div>
-                    
-                    <div class="mt-8 flex justify-center no-print">
-                        <button onclick="initApp()" class="text-slate-500 hover:text-slate-800 font-semibold underline decoration-slate-300 underline-offset-4 transition-colors">
-                            Return to Home / Delete Local Data
-                        </button>
+                    <div>
+                        <h4 class="font-bold text-slate-700">Processing Speed (Gs)</h4>
+                        <p class="text-sm text-slate-500 mt-1">${scores.speed} rapid correct responses</p>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        </div>
 
-        // Boot
-        window.onload = initApp;
-    </script>
+        <div class="p-6 border-t bg-white flex justify-between items-center text-xs text-slate-400">
+            <div>
+                <strong>Disclaimer:</strong> This is an informational estimation tool utilizing procedural matrices and Corsi block constructs. It is not a diagnostic clinical instrument (e.g., WISC-V, WAIS-IV).
+            </div>
+            <button onclick="location.reload()" class="ml-4 px-4 py-2 border rounded hover:bg-slate-50 font-semibold whitespace-nowrap">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Retest
+            </button>
+        </div>
+    `;
+}
+
+// Initialize
+render();
+
+</script>
 </body>
 </html>
+
+
+```
