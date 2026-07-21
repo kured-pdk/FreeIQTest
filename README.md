@@ -1,2 +1,4 @@
-# FreeIQTest
-Professional Grade Cognitive Assessment Battery A comprehensive, 40-question psychometric evaluation measuring quantitative reasoning, fluid intelligence, and spatial processing.
+IQ TEST.
+
+my 7 year old asked, what is her IQ. Could not find any decent test that is free.
+
