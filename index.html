@@ -1,535 +1,797 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Professional-grade, comprehensive cognitive assessment battery. Measures Gf, Gq, Gwm, and Gs.">
-    <title>Comprehensive Clinical Cognitive Assessment</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; }
-        .wm-tile { transition: all 0.2s ease; }
-        .wm-tile.active { background-color: #3b82f6; transform: scale(0.95); }
-        .wm-tile:active { transform: scale(0.95); }
-        .fade-in { animation: fadeIn 0.4s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .gs-symbol { font-family: 'Courier New', Courier, monospace; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Comprehensive Cognitive Battery | Clinical Assessment</title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    :root {
+      --clinical-blue: #4A6FA5;
+      --clinical-slate: #3E4E5F;
+      --clinical-light: #F0F4F8;
+      --clinical-accent: #5B8CBF;
+      --clinical-success: #5D9B7C;
+      --clinical-warning: #C49B5C;
+      --clinical-danger: #B85C5C;
+      --clinical-dark: #1E2A36;
+    }
+    * {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #E8EDF3;
+      min-height: 100vh;
+    }
+    .clinical-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(30, 42, 54, 0.08), 0 1px 4px rgba(30, 42, 54, 0.04);
+      border: 1px solid #E2E8F0;
+    }
+    .progress-bar-fill {
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(90deg, #4A6FA5 0%, #5B8CBF 50%, #6DA3D4 100%);
+      box-shadow: 0 0 12px rgba(74, 111, 165, 0.3);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4A6FA5 0%, #3D5D8A 100%);
+      color: #FFF;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 12px 28px;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(74, 111, 165, 0.25);
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(74, 111, 165, 0.35);
+      background: linear-gradient(135deg, #5B8CBF 0%, #4A6FA5 100%);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(74, 111, 165, 0.3);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-outline {
+      background: #FFF;
+      color: #3D5D8A;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 22px;
+      border: 2px solid #D0D8E4;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-outline:hover {
+      border-color: #4A6FA5;
+      background: #F8FAFC;
+    }
+    .corsi-cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: 2.5px solid #D0D8E4;
+      background: #F8FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #B0BEC5;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .corsi-cell.flash {
+      background: #4A6FA5 !important;
+      border-color: #3D5D8A !important;
+      color: #FFF !important;
+      box-shadow: 0 0 20px rgba(74, 111, 165, 0.6);
+      transform: scale(1.04);
+      animation: pulseFlash 0.45s ease-out;
+    }
+    .corsi-cell.user-selected {
+      background: #5D9B7C !important;
+      border-color: #4A7D63 !important;
+      color: #FFF !important;
+      box-shadow: 0 0 14px rgba(93, 155, 124, 0.5);
+    }
+    .corsi-cell.user-error {
+      background: #B85C5C !important;
+      border-color: #9B4A4A !important;
+      color: #FFF !important;
+      animation: shake 0.5s ease;
+    }
+    @keyframes pulseFlash {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(74, 111, 165, 0); }
+      40% { transform: scale(1.08); box-shadow: 0 0 28px rgba(74, 111, 165, 0.7); }
+      100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(74, 111, 165, 0.6); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+    .matrix-option {
+      cursor: pointer;
+      border-radius: 12px;
+      border: 3px solid transparent;
+      transition: all 0.2s ease;
+      background: #FFF;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .matrix-option:hover {
+      border-color: #5B8CBF;
+      box-shadow: 0 4px 16px rgba(91, 140, 191, 0.2);
+      transform: translateY(-2px);
+    }
+    .matrix-option.selected {
+      border-color: #4A6FA5 !important;
+      box-shadow: 0 0 0 4px rgba(74, 111, 165, 0.2) !important;
+      background: #F0F4F8 !important;
+    }
+    .matrix-option.correct-flash {
+      border-color: #5D9B7C !important;
+      box-shadow: 0 0 0 6px rgba(93, 155, 124, 0.3) !important;
+      background: #EDF7F2 !important;
+    }
+    .matrix-option.incorrect-flash {
+      border-color: #B85C5C !important;
+      box-shadow: 0 0 0 6px rgba(184, 92, 92, 0.3) !important;
+      background: #FDF2F2 !important;
+    }
+    .timer-ring {
+      transition: stroke-dashoffset 1s linear;
+    }
+    .iq-bar-fill {
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+      border-radius: 8px;
+    }
+    .option-svg-container {
+      width: 100%;
+      max-width: 100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 640px) {
+      .option-svg-container {
+        max-width: 80px;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen text-slate-800 flex items-center justify-center p-4 md:p-8">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div id="app" class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[700px] flex flex-col relative fade-in border border-slate-100">
-        <!-- Dynamic Content -->
+  <!-- Top Progress Bar -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <div class="max-w-3xl mx-auto px-4 py-2 flex items-center gap-3">
+      <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Progress</span>
+      <div class="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div id="globalProgressBar" class="progress-bar-fill h-full rounded-full" style="width: 0%;"></div>
+      </div>
+      <span id="progressLabel" class="text-xs font-bold text-gray-600 whitespace-nowrap">0%</span>
     </div>
+  </div>
 
-<script>
-/**
- * COMPREHENSIVE CLINICAL COGNITIVE ASSESSMENT ENGINE
- * Phase 1: Gq (Quantitative)
- * Phase 2: Gf (Spatial/Fluid)
- * Phase 3: Gwm-F (Forward Memory)
- * Phase 4: Gwm-B (Backward Memory)
- * Phase 5: Gs (Processing Speed)
- */
+  <!-- Main App Container -->
+  <div id="appContainer" class="w-full max-w-2xl mt-16 clinical-card p-4 sm:p-8 animate-in">
+    <!-- Content rendered dynamically -->
+  </div>
 
-// --- STATE MANAGEMENT ---
-const state = {
-    phase: 'setup', 
-    ageMonths: 120,
-    globalProgress: 0, // 0 to 100 across the whole battery
+  <!-- Footer -->
+  <div class="max-w-2xl w-full mt-3 text-center text-xs text-gray-400">
+    <i class="fas fa-shield-alt mr-1"></i> Zero data transmission · 100% client-side · COPPA/GDPR-K compliant
+  </div>
 
-    gq: { level: 1, consecPass: 0, consecFail: 0, count: 0, max: 20, history: [], currentStart: 0, currentQ: null },
-    gf: { level: 1, consecPass: 0, consecFail: 0, count: 0, max: 25, history: [], currentStart: 0, currentQ: null },
-    wm_f: { sequence: [], userIndex: 0, currentLength: 3, failsAtCurrent: 0, maxScore: 0, isFlashing: false },
-    wm_b: { sequence: [], userIndex: 0, currentLength: 2, failsAtCurrent: 0, maxScore: 0, isFlashing: false },
-    gs: { timeRemaining: 60, score: 0, active: false, currentTarget: '', options: [], timerId: null }
-};
+  <script>
+    (function() {
+      // ──────────────────────────────────────
+      // STATE MACHINE
+      // ──────────────────────────────────────
+      const STATE = {
+        INIT: 'init',
+        PHASE1: 'phase1',
+        PHASE2: 'phase2',
+        PHASE3: 'phase3',
+        PHASE4: 'phase4',
+        PHASE5: 'phase5',
+        RESULTS: 'results',
+      };
 
-const appDiv = document.getElementById('app');
+      const app = {
+        currentState: STATE.INIT,
+        chronologicalAge: null,
 
-// --- GENERATORS ---
-const gen = {
-    math: (level) => {
-        let seq = [], ans, dist = [], rule = "?";
-        if (level === 1) {
-            let start = Math.floor(Math.random()*10)+2;
-            let step = Math.floor(Math.random()*5)+2;
-            seq = [start, start+step, start+step*2, start+step*3];
-            ans = start+step*4;
-            dist = [ans-1, ans+1, ans-step, ans+step+1];
-        } else if (level === 2) {
-            let start = Math.floor(Math.random()*5)+2;
-            let mult = Math.floor(Math.random()*3)+2;
-            seq = [start, start*mult, start*mult*mult, start*mult*mult*mult];
-            ans = start*Math.pow(mult, 4);
-            dist = [ans-mult, ans+start, ans/2, ans+1];
-        } else if (level === 3) {
-            let start = Math.floor(Math.random()*20)+10;
-            let step = Math.floor(Math.random()*4)+2;
-            seq = [start, start-step, (start-step)*2, ((start-step)*2)-step];
-            ans = (((start-step)*2)-step)*2;
-            dist = [ans-step, ans+step, ans/2, ans-10];
+        phase1: {
+          difficulty: 5, consecutiveCorrect: 0, consecutiveWrong: 0,
+          questionsAnswered: 0, maxQuestions: 20, correctCount: 0,
+          currentQuestion: null, answerSelected: false, totalDifficultySum: 0,
+        },
+        phase2: {
+          difficulty: 5, consecutiveCorrect: 0, consecutiveWrong: 0,
+          questionsAnswered: 0, maxQuestions: 25, correctCount: 0,
+          currentQuestion: null, answerSelected: false, totalDifficultySum: 0,
+        },
+        phase3: {
+          currentSpan: 3, sequence: [], userSequence: [],
+          isFlashing: false, isAcceptingInput: false, failuresAtCurrentSpan: 0,
+          maxSpanAchieved: 2, phaseComplete: false, flashIndex: 0, totalAttempts: 0,
+        },
+        phase4: {
+          currentSpan: 3, sequence: [], userSequence: [],
+          isFlashing: false, isAcceptingInput: false, failuresAtCurrentSpan: 0,
+          maxSpanAchieved: 2, phaseComplete: false, flashIndex: 0, totalAttempts: 0,
+        },
+        phase5: {
+          timeRemaining: 60, totalTime: 60, score: 0, trialsCompleted: 0,
+          timerInterval: null, currentTrial: null, phaseActive: false, answerLocked: false,
+        },
+        results: {
+          gqRaw: 0, gfRaw: 0, gwmFRaw: 0, gwmBRaw: 0, gsRaw: 0,
+          gqIQ: 0, gfIQ: 0, gwmIQ: 0, gsIQ: 0, fsiq: 0, classification: '',
+        },
+      };
+
+      const appContainer = document.getElementById('appContainer');
+      const globalProgressBar = document.getElementById('globalProgressBar');
+      const progressLabel = document.getElementById('progressLabel');
+
+      function updateProgress(percentage) {
+        const pct = Math.min(100, Math.max(0, Math.round(percentage)));
+        globalProgressBar.style.width = pct + '%';
+        progressLabel.textContent = pct + '%';
+      }
+
+      function render(html) {
+        appContainer.innerHTML = html;
+        appContainer.classList.remove('animate-in');
+        void appContainer.offsetWidth;
+        appContainer.classList.add('animate-in');
+      }
+
+      // ──────────────────────────────────────
+      // PHASE 0: INITIALIZATION
+      // ──────────────────────────────────────
+      function renderInit() {
+        updateProgress(0);
+        render(`
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
+              <i class="fas fa-brain text-3xl text-blue-600"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Comprehensive Cognitive Battery</h1>
+            <p class="text-sm text-gray-500 mb-6">Professional-grade psychometric assessment</p>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-left text-sm text-amber-800">
+              <p class="font-semibold mb-1"><i class="fas fa-lock mr-1"></i> Privacy Assurance</p>
+              <p class="text-xs">This assessment runs entirely within your browser. <strong>Zero data</strong> is collected, transmitted, or stored externally. Fully compliant with COPPA and GDPR-K regulations. No account required.</p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
+              <label for="ageInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-calendar-alt mr-1 text-blue-500"></i> Chronological Age (Years)
+              </label>
+              <input type="number" id="ageInput" min="6" max="99" value="16"
+              class="w-full max-w-xs mx-auto block text-center text-xl font-bold border-2 border-gray-300 rounded-xl py-3 px-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+              placeholder="6-99">
+              <p class="text-xs text-gray-400 mt-2">Valid range: 6 – 99 years</p>
+            </div>
+            <button id="btnStartAssessment" class="btn-primary text-lg px-10 py-4">
+              <i class="fas fa-play mr-2"></i> Initialize Assessment
+            </button>
+          </div>
+        `);
+        document.getElementById('btnStartAssessment').addEventListener('click', () => {
+          const ageInput = document.getElementById('ageInput');
+          const age = parseInt(ageInput.value);
+          if (isNaN(age) || age < 6 || age > 99) {
+            ageInput.classList.add('border-red-500', 'ring-4', 'ring-red-100');
+            ageInput.focus();
+            setTimeout(() => ageInput.classList.remove('border-red-500', 'ring-4', 'ring-red-100'), 1500);
+            return;
+          }
+          app.chronologicalAge = age;
+          startPhase1();
+        });
+      }
+
+      // ──────────────────────────────────────
+      // PHASE 1: QUANTITATIVE REASONING (Gq)
+      // ──────────────────────────────────────
+      function startPhase1() {
+        app.currentState = STATE.PHASE1;
+        app.phase1.difficulty = Math.min(10, Math.max(1, Math.round(app.chronologicalAge / 3.5)));
+        app.phase1.consecutiveCorrect = 0; app.phase1.consecutiveWrong = 0;
+        app.phase1.questionsAnswered = 0; app.phase1.correctCount = 0; app.phase1.totalDifficultySum = 0;
+        app.phase1.answerSelected = false;
+        generatePhase1Question();
+        renderPhase1();
+      }
+
+      function generatePhase1Question() {
+        const diff = app.phase1.difficulty;
+        const patternType = diff <= 3 ? 'arithmetic' : diff <= 6 ? 'geometric' : diff <= 8 ? 'alternating' : 'complex';
+        let sequence = [], correctAnswer = 0;
+        const len = 5 + Math.floor(diff / 2);
+        if (patternType === 'arithmetic') {
+          const start = Math.floor(Math.random() * 15 * diff) + 2;
+          const step = Math.floor(Math.random() * (diff + 2)) + 1;
+          for (let i = 0; i < len; i++) sequence.push(start + step * i);
+          correctAnswer = sequence[sequence.length - 1] + step;
+        } else if (patternType === 'geometric') {
+          const start = Math.floor(Math.random() * 5) + 2;
+          const ratio = Math.floor(Math.random() * 2) + 2;
+          for (let i = 0; i < len; i++) sequence.push(start * Math.pow(ratio, i));
+          correctAnswer = sequence[sequence.length - 1] * ratio;
+        } else if (patternType === 'alternating') {
+          const a1 = Math.floor(Math.random() * 10) + 3, d1 = Math.floor(Math.random() * (diff + 1)) + 2;
+          const a2 = Math.floor(Math.random() * 20) + 5, d2 = Math.floor(Math.random() * (diff + 1)) + 1;
+          for (let i = 0; i < len; i++) sequence.push(i % 2 === 0 ? a1 + Math.floor(i / 2) * d1 : a2 + Math.floor(i / 2) * d2);
+          const nextIdx = len;
+          correctAnswer = nextIdx % 2 === 0 ? a1 + Math.floor(nextIdx / 2) * d1 : a2 + Math.floor(nextIdx / 2) * d2;
         } else {
-            let a = Math.floor(Math.random()*3)+1;
-            let b = Math.floor(Math.random()*4)+2;
-            seq = [a, b, a+b, b+(a+b), (a+b)+(b+(a+b))];
-            ans = (b+(a+b)) + ((a+b)+(b+(a+b)));
-            dist = [ans-1, ans+2, ans-b, ans+10];
+          const base = Math.floor(Math.random() * 8 * diff) + 5, mod = Math.floor(Math.random() * (diff + 3)) + 2;
+          for (let i = 0; i < len; i++) sequence.push(base + i * mod + (i % 3 === 0 ? mod : 0));
+          correctAnswer = sequence[sequence.length - 1] + mod + ((len % 3 === 0) ? mod : 0);
         }
-        dist = [...new Set(dist)].filter(d => d !== ans).slice(0, 4);
-        while(dist.length < 4) dist.push(ans + Math.floor(Math.random()*10)+1);
-        let opts = [...dist, ans].sort(() => Math.random() - 0.5).slice(0,4);
-        if(!opts.includes(ans)) opts[Math.floor(Math.random()*4)] = ans;
-
-        return {
-            html: `<div class="text-3xl md:text-5xl font-mono tracking-widest text-center text-slate-700">${seq.join(', ')}, <span class="text-blue-600 font-bold">${rule}</span></div>`,
-            opts: opts, ans: ans, isHtml: false
+        const distractors = new Set([correctAnswer, correctAnswer + 1, correctAnswer - 1, Math.round(correctAnswer * 0.85), Math.round(correctAnswer * 1.15)]);
+        const options = [correctAnswer, ...Array.from(distractors).filter(d => d !== correctAnswer && d > 0).slice(0, 3)];
+        shuffleArray(options);
+        app.phase1.currentQuestion = {
+          sequence, correctAnswer, options, correctIndex: options.indexOf(correctAnswer), difficulty: diff, patternType,
         };
-    },
+        app.phase1.answerSelected = false;
+      }
 
-    spatial: (level) => {
-        const shapes = ['rect', 'circle', 'polygon'];
-        const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'];
-        
-        let s = shapes[Math.floor(Math.random() * shapes.length)];
-        let c1 = colors[Math.floor(Math.random() * colors.length)];
-        let c2 = colors[Math.floor(Math.random() * colors.length)];
-        while(c1 === c2) c2 = colors[Math.floor(Math.random() * colors.length)];
-        
-        const d = (rot, sc, fill, dashed=false) => {
-            let str = `<g transform="rotate(${rot} 25 25)">`;
-            if(s === 'rect') str += `<rect x="${25 - (20*sc)}" y="${25 - (20*sc)}" width="${40*sc}" height="${40*sc}" fill="${fill}" ${dashed?'stroke="#000" stroke-width="2" stroke-dasharray="4,2"':''}/>`;
-            if(s === 'circle') str += `<circle cx="25" cy="25" r="${20*sc}" fill="${fill}" ${dashed?'stroke="#000" stroke-width="2" stroke-dasharray="4,2"':''}/>`;
-            if(s === 'polygon') str += `<polygon points="25,${25 - 20*sc} ${25 + 20*sc},${25 + 20*sc} ${25 - 20*sc},${25 + 20*sc}" fill="${fill}" ${dashed?'stroke="#000" stroke-width="2" stroke-dasharray="4,2"':''}/>`;
-            return str + `</g>`;
-        };
-
-        let sB = `<svg viewBox="0 0 50 50" class="w-16 h-16 md:w-20 md:h-20 inline-block shadow-sm rounded bg-white">`;
-        let m = `<div class="grid grid-cols-3 gap-2 md:gap-4 mx-auto bg-slate-100 p-4 md:p-6 rounded-2xl border-2 border-slate-200">`;
-        let ans, dist = [];
-
-        if (level === 1) { // Simple Rotation
-            for(let i=0;i<8;i++) m += `${sB}${d(i*45, 1, c1)}</svg>`;
-            m += `<div class="w-16 h-16 md:w-20 md:h-20 inline-flex items-center justify-center border-4 border-dashed border-blue-400 rounded bg-blue-50 text-blue-500 text-3xl font-black">?</div>`;
-            ans = `${sB}${d(360, 1, c1)}</svg>`;
-            dist = [`${sB}${d(45, 1, c1)}</svg>`,`${sB}${d(90, 1, c2)}</svg>`,`${sB}${d(0, 0.5, c1)}</svg>`];
-        } else if (level === 2) { // Logic (A + B = C)
-            for(let r=0; r<2; r++) m += `${sB}${d(0, 0.6, c1)}</svg>${sB}${d(45, 0.6, c2)}</svg>${sB}${d(0, 0.6, c1)}${d(45, 0.6, c2, true)}</svg>`;
-            m += `${sB}${d(90, 0.6, c1)}</svg>${sB}${d(135, 0.6, c2)}</svg><div class="w-16 h-16 md:w-20 md:h-20 inline-flex items-center justify-center border-4 border-dashed border-blue-400 rounded bg-blue-50 text-blue-500 text-3xl font-black">?</div>`;
-            ans = `${sB}${d(90, 0.6, c1)}${d(135, 0.6, c2, true)}</svg>`;
-            dist = [`${sB}${d(0, 0.6, c1)}${d(45, 0.6, c2, true)}</svg>`,`${sB}${d(135, 0.6, c1)}${d(90, 0.6, c2, true)}</svg>`,`${sB}${d(90, 1, c1)}</svg>`];
-        } else { // Complex Multi-variable
-             for(let r=0; r<2; r++) m += `${sB}${d(0, 0.4, c1)}</svg>${sB}${d(45, 0.7, c2)}</svg>${sB}${d(90, 1.0, colors[3])}</svg>`;
-             m += `${sB}${d(0, 0.4, c1)}</svg>${sB}${d(45, 0.7, c2)}</svg><div class="w-16 h-16 md:w-20 md:h-20 inline-flex items-center justify-center border-4 border-dashed border-blue-400 rounded bg-blue-50 text-blue-500 text-3xl font-black">?</div>`;
-             ans = `${sB}${d(90, 1.0, colors[3])}</svg>`;
-             dist = [`${sB}${d(90, 0.7, colors[3])}</svg>`,`${sB}${d(45, 1.0, c1)}</svg>`,`${sB}${d(90, 1.0, c2)}</svg>`];
-        }
-        m += `</div>`;
-        let opts = [...dist, ans].sort(() => Math.random() - 0.5);
-
-        return { html: m, opts: opts, ans: ans, isHtml: true };
-    },
-    
-    symbols: () => {
-        const syms = ['Ω','Σ','Δ','Ψ','Φ','Γ','Λ','Θ','Ξ','Π'];
-        let target = syms[Math.floor(Math.random() * syms.length)];
-        let isPresent = Math.random() > 0.4; // 60% chance present
-        let opts = [];
-        for(let i=0; i<4; i++) opts.push(syms[Math.floor(Math.random() * syms.length)]);
-        if (isPresent && !opts.includes(target)) opts[Math.floor(Math.random() * 4)] = target;
-        if (!isPresent && opts.includes(target)) opts[opts.indexOf(target)] = syms.find(s => s !== target);
-        return { target, opts, isPresent };
-    }
-};
-
-// --- CORE LOGIC ---
-
-function updateGlobalProgress() {
-    // Math 20%, Spatial 25%, WMF 20%, WMB 20%, Speed 15%
-    let p = 0;
-    if(state.phase.includes('gq')) p = (state.gq.count / state.gq.max) * 20;
-    else if(state.phase.includes('gf')) p = 20 + ((state.gf.count / state.gf.max) * 25);
-    else if(state.phase.includes('wm_f')) p = 45 + ((state.wm_f.currentLength-3)/5 * 20);
-    else if(state.phase.includes('wm_b')) p = 65 + ((state.wm_b.currentLength-2)/5 * 20);
-    else if(state.phase.includes('gs')) p = 85 + ((60-state.gs.timeRemaining)/60 * 15);
-    else if(state.phase === 'results') p = 100;
-    state.globalProgress = Math.min(100, Math.max(0, p));
-}
-
-function handleAdaptiveAnswer(domain, selectedIndex) {
-    const d = state[domain];
-    const q = d.currentQ;
-    const isCorrect = q.opts[selectedIndex] === q.ans;
-    const timeTaken = Date.now() - d.currentStart;
-
-    d.history.push({ level: d.level, correct: isCorrect, timeMs: timeTaken });
-
-    if (isCorrect) { d.consecPass++; d.consecFail = 0; } 
-    else { d.consecFail++; d.consecPass = 0; }
-
-    if (d.consecPass >= 2 && d.level < 4) { d.level++; d.consecPass = 0; }
-    else if (d.consecFail >= 2 && d.level > 1) { d.level--; d.consecFail = 0; }
-
-    d.count++;
-    updateGlobalProgress();
-
-    if (d.count >= d.max) {
-        if(domain === 'gq') { state.phase = 'intro_gf'; }
-        if(domain === 'gf') { state.phase = 'intro_wm_f'; }
-    } else {
-        d.currentQ = domain === 'gq' ? gen.math(d.level) : gen.spatial(d.level);
-        d.currentStart = Date.now();
-    }
-    render();
-}
-
-function handleWmClick(idx, isBackward = false) {
-    const d = isBackward ? state.wm_b : state.wm_f;
-    if (d.isFlashing) return;
-
-    const t = document.getElementById(`wm-tile-${idx}`);
-    t.classList.add('bg-blue-300', 'scale-90');
-    setTimeout(() => t.classList.remove('bg-blue-300', 'scale-90'), 200);
-
-    // Backward logic checks against reverse sequence
-    const checkArray = isBackward ? [...d.sequence].reverse() : d.sequence;
-
-    if (idx === checkArray[d.userIndex]) {
-        d.userIndex++;
-        if (d.userIndex === d.sequence.length) {
-            d.maxScore = d.currentLength;
-            d.currentLength++;
-            d.failsAtCurrent = 0;
-            document.getElementById('wm-status').innerHTML = '<i class="fa-solid fa-check-circle text-green-500 text-7xl bg-white rounded-full"></i>';
-            setTimeout(() => { generateWmSequence(isBackward); updateGlobalProgress(); }, 1200);
-        }
-    } else {
-        d.failsAtCurrent++;
-        document.getElementById('wm-status').innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500 text-7xl bg-white rounded-full"></i>';
-        if (d.failsAtCurrent >= 2) {
+      function renderPhase1() {
+        const q = app.phase1.currentQuestion;
+        updateProgress(5 + Math.round((app.phase1.questionsAnswered / app.phase1.maxQuestions) * 20));
+        const optionsHTML = q.options.map((opt, idx) => `
+          <button class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition-all font-semibold text-lg text-gray-700 option-btn"
+            data-option-index="${idx}" id="optBtn${idx}">${opt}</button>
+        `).join('');
+        render(`
+          <div>
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700"><i class="fas fa-calculator mr-1"></i> Phase 1: Quantitative Reasoning</span>
+              <span class="text-xs text-gray-400">Question ${app.phase1.questionsAnswered + 1} of ${app.phase1.maxQuestions}</span>
+              <span class="text-xs text-gray-400">Difficulty: ${'●'.repeat(q.difficulty)}${'○'.repeat(10-q.difficulty)}</span>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 mb-5 border border-gray-200">
+              <p class="text-sm text-gray-500 mb-2 font-medium">Find the next number in the sequence:</p>
+              <p class="text-2xl font-bold text-gray-800 tracking-wide font-mono">${q.sequence.join(', ')}, <span class="text-blue-600 underline decoration-2 underline-offset-4">?</span></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3" id="optionsGrid">${optionsHTML}</div>
+            <div id="feedbackArea" class="mt-4 text-center min-h-[2rem]"></div>
+          </div>
+        `);
+        document.querySelectorAll('.option-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            if (app.phase1.answerSelected) return;
+            app.phase1.answerSelected = true;
+            const selectedIndex = parseInt(this.getAttribute('data-option-index'));
+            const isCorrect = selectedIndex === q.correctIndex;
+            document.getElementById('optBtn' + q.correctIndex).classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+            if (!isCorrect) this.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+            if (isCorrect) {
+              app.phase1.correctCount++; app.phase1.consecutiveCorrect++; app.phase1.consecutiveWrong = 0; app.phase1.totalDifficultySum += q.difficulty;
+              document.getElementById('feedbackArea').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
+              if (app.phase1.consecutiveCorrect >= 2 && app.phase1.difficulty < 10) { app.phase1.difficulty++; app.phase1.consecutiveCorrect = 0; }
+            } else {
+              app.phase1.consecutiveWrong++; app.phase1.consecutiveCorrect = 0; app.phase1.totalDifficultySum += Math.max(1, q.difficulty - 2);
+              document.getElementById('feedbackArea').innerHTML = `<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect. Answer: ${q.correctAnswer}</span>`;
+              if (app.phase1.consecutiveWrong >= 2 && app.phase1.difficulty > 1) { app.phase1.difficulty--; app.phase1.consecutiveWrong = 0; }
+            }
+            app.phase1.questionsAnswered++;
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             setTimeout(() => {
-                state.phase = isBackward ? 'intro_gs' : 'intro_wm_b';
-                updateGlobalProgress();
-                render();
-            }, 1500);
-        } else {
-            setTimeout(() => generateWmSequence(isBackward), 1500);
+              if (app.phase1.questionsAnswered >= app.phase1.maxQuestions) { finishPhase1(); }
+              else { generatePhase1Question(); renderPhase1(); }
+            }, 900);
+          });
+        });
+      }
+
+      function finishPhase1() { app.results.gqRaw = app.phase1.correctCount; updateProgress(25); startPhase2(); }
+
+      // ──────────────────────────────────────
+      // PHASE 2: FLUID SPATIAL LOGIC (Gf) – FIXED MOBILE OVERLAP & DISTINCT OPTIONS
+      // ──────────────────────────────────────
+      function startPhase2() {
+        app.currentState = STATE.PHASE2;
+        app.phase2.difficulty = Math.min(10, Math.max(1, Math.round(app.chronologicalAge / 3.5)));
+        app.phase2.consecutiveCorrect = 0; app.phase2.consecutiveWrong = 0;
+        app.phase2.questionsAnswered = 0; app.phase2.correctCount = 0; app.phase2.totalDifficultySum = 0;
+        app.phase2.answerSelected = false;
+        generatePhase2Question();
+        renderPhase2();
+      }
+
+      function generateSingleShapeSVG(shapeObj, size = 80) {
+        const { shape, color, rotation } = shapeObj;
+        const cx = size/2, cy = size/2, r = size * 0.35;
+        let shapeCode = '';
+        switch (shape) {
+          case 'circle': shapeCode = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" transform="rotate(${rotation}, ${cx}, ${cy})"/>`; break;
+          case 'square': shapeCode = `<rect x="${cx - r}" y="${cy - r}" width="${r*2}" height="${r*2}" fill="${color}" rx="3" transform="rotate(${rotation}, ${cx}, ${cy})"/>`; break;
+          case 'triangle': const tp = `${cx},${cy - r} ${cx - r},${cy + r} ${cx + r},${cy + r}`; shapeCode = `<polygon points="${tp}" fill="${color}" transform="rotate(${rotation}, ${cx}, ${cy})"/>`; break;
+          case 'diamond': const dp = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`; shapeCode = `<polygon points="${dp}" fill="${color}" transform="rotate(${rotation}, ${cx}, ${cy})"/>`; break;
+          case 'star': const sp = []; for (let i=0;i<5;i++) { const a = (i*72-90)*Math.PI/180; sp.push(`${cx + r*Math.cos(a)},${cy + r*Math.sin(a)}`); const ai = ((i*72)+36-90)*Math.PI/180; sp.push(`${cx + r*0.4*Math.cos(ai)},${cy + r*0.4*Math.sin(ai)}`); } shapeCode = `<polygon points="${sp.join(' ')}" fill="${color}" transform="rotate(${rotation}, ${cx}, ${cy})"/>`; break;
         }
-    }
-}
+        return `<svg viewBox="0 0 ${size} ${size}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect width="${size}" height="${size}" fill="#fff" rx="8"/>${shapeCode}</svg>`;
+      }
 
-function generateWmSequence(isBackward = false) {
-    const d = isBackward ? state.wm_b : state.wm_f;
-    d.sequence = [];
-    d.userIndex = 0;
-    for(let i=0; i<d.currentLength; i++) d.sequence.push(Math.floor(Math.random() * 9));
-    render();
-    setTimeout(() => playWmSequence(isBackward), 800);
-}
+      function generateMatrixSVG(gridData, cellSize = 70, highlightMissing = true) {
+        const shapes = gridData;
+        let svgContent = '';
+        const padding = 5, totalSize = cellSize * 3 + padding * 2;
+        for (let row = 0; row < 3; row++) {
+          for (let col = 0; col < 3; col++) {
+            const x = padding + col * cellSize, y = padding + row * cellSize;
+            const cell = shapes[row][col];
+            if (cell === null && highlightMissing) {
+              svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="#F0F4F8" stroke="#CBD5E1" stroke-width="2" rx="6" stroke-dasharray="6,3"/><text x="${x+cellSize/2}" y="${y+cellSize/2}" text-anchor="middle" dominant-baseline="central" font-size="28" fill="#94A3B8">?</text>`;
+            } else if (cell) {
+              svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="#FFF" stroke="#E2E8F0" stroke-width="1.5" rx="6"/>`;
+              const innerSize = cellSize * 0.55, cxCell = x + cellSize/2, cyCell = y + cellSize/2, rInner = innerSize/2;
+              switch (cell.shape) {
+                case 'circle': svgContent += `<circle cx="${cxCell}" cy="${cyCell}" r="${rInner}" fill="${cell.color}" transform="rotate(${cell.rotation}, ${cxCell}, ${cyCell})"/>`; break;
+                case 'square': svgContent += `<rect x="${cxCell - rInner}" y="${cyCell - rInner}" width="${rInner*2}" height="${rInner*2}" fill="${cell.color}" rx="2" transform="rotate(${cell.rotation}, ${cxCell}, ${cyCell})"/>`; break;
+                case 'triangle': const tp = `${cxCell},${cyCell - rInner} ${cxCell - rInner},${cyCell + rInner} ${cxCell + rInner},${cyCell + rInner}`; svgContent += `<polygon points="${tp}" fill="${cell.color}" transform="rotate(${cell.rotation}, ${cxCell}, ${cyCell})"/>`; break;
+                case 'diamond': const dp = `${cxCell},${cyCell - rInner} ${cxCell + rInner},${cyCell} ${cxCell},${cyCell + rInner} ${cxCell - rInner},${cyCell}`; svgContent += `<polygon points="${dp}" fill="${cell.color}" transform="rotate(${cell.rotation}, ${cxCell}, ${cyCell})"/>`; break;
+                case 'star': const sp = []; for (let i=0;i<5;i++) { const a=(i*72-90)*Math.PI/180; sp.push(`${cxCell + rInner*Math.cos(a)},${cyCell + rInner*Math.sin(a)}`); const ai=((i*72)+36-90)*Math.PI/180; sp.push(`${cxCell + rInner*0.4*Math.cos(ai)},${cyCell + rInner*0.4*Math.sin(ai)}`); } svgContent += `<polygon points="${sp.join(' ')}" fill="${cell.color}" transform="rotate(${cell.rotation}, ${cxCell}, ${cyCell})"/>`; break;
+              }
+            }
+          }
+        }
+        return `<svg viewBox="0 0 ${totalSize} ${totalSize}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>`;
+      }
 
-async function playWmSequence(isBackward = false) {
-    const d = isBackward ? state.wm_b : state.wm_f;
-    d.isFlashing = true;
-    render();
-    
-    for(let i=0; i<d.sequence.length; i++) {
-        const t = document.getElementById(`wm-tile-${d.sequence[i]}`);
-        await new Promise(r => setTimeout(r, 400));
-        t.classList.add('bg-blue-600', 'scale-95', 'shadow-inner');
-        t.classList.remove('bg-slate-100');
-        await new Promise(r => setTimeout(r, 600));
-        t.classList.remove('bg-blue-600', 'scale-95', 'shadow-inner');
-        t.classList.add('bg-slate-100');
-    }
-    d.isFlashing = false;
-    render();
-}
+      function generatePhase2Question() {
+        const diff = app.phase2.difficulty;
+        const shapes = ['circle', 'square', 'triangle', 'diamond', 'star'];
+        const colors = ['#4A6FA5', '#B85C5C', '#5D9B7C', '#C49B5C', '#7B5EA7', '#D4756B', '#5B8CBF', '#E89B53'];
+        const rotations = [0, 45, 90, 135, 180, 225, 270, 315];
+        const rowShape = shapes[Math.floor(Math.random() * shapes.length)];
+        const colColor = colors[Math.floor(Math.random() * colors.length)];
+        const rotStep = rotations[Math.min(diff, rotations.length - 1)] || 45;
+        const grid = [];
+        for (let r = 0; r < 3; r++) {
+          grid[r] = [];
+          for (let c = 0; c < 3; c++) {
+            if (r === 2 && c === 2) { grid[r][c] = null; }
+            else {
+              const shapeIdx = (shapes.indexOf(rowShape) + r + c) % shapes.length;
+              const colorIdx = (colors.indexOf(colColor) + r + c) % colors.length;
+              grid[r][c] = { shape: shapes[shapeIdx], color: colors[colorIdx], rotation: (r * rotStep + c * rotStep) % 360 };
+            }
+          }
+        }
+        const correctShapeIdx = (shapes.indexOf(rowShape) + 2 + 2) % shapes.length;
+        const correctColorIdx = (colors.indexOf(colColor) + 2 + 2) % colors.length;
+        const correctAnswer = { shape: shapes[correctShapeIdx], color: colors[correctColorIdx], rotation: (2 * rotStep + 2 * rotStep) % 360 };
+        const distractorOptions = [];
+        const seenKeys = new Set([`${correctAnswer.shape}|${correctAnswer.color}|${correctAnswer.rotation}`]);
+        const d1 = { shape: shapes[(correctShapeIdx + 1) % shapes.length], color: correctAnswer.color, rotation: correctAnswer.rotation };
+        if (!seenKeys.has(`${d1.shape}|${d1.color}|${d1.rotation}`)) { distractorOptions.push(d1); seenKeys.add(`${d1.shape}|${d1.color}|${d1.rotation}`); }
+        const d2Color = colors[(correctColorIdx + 2) % colors.length];
+        const d2 = { shape: correctAnswer.shape, color: d2Color, rotation: correctAnswer.rotation };
+        if (!seenKeys.has(`${d2.shape}|${d2.color}|${d2.rotation}`)) { distractorOptions.push(d2); seenKeys.add(`${d2.shape}|${d2.color}|${d2.rotation}`); }
+        const d3 = { shape: correctAnswer.shape, color: correctAnswer.color, rotation: (correctAnswer.rotation + 90) % 360 };
+        if (!seenKeys.has(`${d3.shape}|${d3.color}|${d3.rotation}`)) { distractorOptions.push(d3); seenKeys.add(`${d3.shape}|${d3.color}|${d3.rotation}`); }
+        const d4 = { shape: shapes[(correctShapeIdx + 2) % shapes.length], color: colors[(correctColorIdx + 1) % colors.length], rotation: (correctAnswer.rotation + 45) % 360 };
+        if (!seenKeys.has(`${d4.shape}|${d4.color}|${d4.rotation}`)) { distractorOptions.push(d4); seenKeys.add(`${d4.shape}|${d4.color}|${d4.rotation}`); }
+        while (distractorOptions.length < 3) {
+          const rs = shapes[Math.floor(Math.random() * shapes.length)], rc = colors[Math.floor(Math.random() * colors.length)], rr = rotations[Math.floor(Math.random() * rotations.length)];
+          if (!seenKeys.has(`${rs}|${rc}|${rr}`)) { distractorOptions.push({ shape: rs, color: rc, rotation: rr }); seenKeys.add(`${rs}|${rc}|${rr}`); }
+        }
+        const finalDistractors = distractorOptions.slice(0, 3);
+        const allOptions = [correctAnswer, ...finalDistractors];
+        shuffleArray(allOptions);
+        app.phase2.currentQuestion = {
+          grid, options: allOptions, correctIndex: allOptions.findIndex(o => o.shape === correctAnswer.shape && o.color === correctAnswer.color && o.rotation === correctAnswer.rotation), difficulty: diff,
+        };
+        app.phase2.answerSelected = false;
+      }
 
-function runGsTick() {
-    if(!state.gs.active) return;
-    state.gs.timeRemaining--;
-    updateGlobalProgress();
-    if(state.gs.timeRemaining <= 0) {
-        state.gs.active = false;
-        clearInterval(state.gs.timerId);
-        state.phase = 'results';
-        updateGlobalProgress();
-        render();
-    } else {
-        document.getElementById('gs-timer').innerText = state.gs.timeRemaining;
-    }
-}
-
-function handleGsAnswer(selectedPresent) {
-    if(!state.gs.active) return;
-    const isCorrect = selectedPresent === state.gs.current.isPresent;
-    if(isCorrect) state.gs.score++;
-    else state.gs.score = Math.max(0, state.gs.score - 1); // Penalty for guessing
-    
-    state.gs.current = gen.symbols();
-    renderGsTest(true); // partial render
-}
-
-// --- RENDERERS ---
-
-function TopBar(title) {
-    return `
-        <div class="h-2 w-full bg-slate-100 absolute top-0 left-0">
-            <div class="h-full bg-blue-600 transition-all duration-500 ease-out" style="width: ${state.globalProgress}%"></div>
-        </div>
-        <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm pt-6 md:pt-8">
-            <span class="font-bold text-slate-800 tracking-tight text-lg">${title}</span>
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:block">Clinical Battery</span>
-        </div>
-    `;
-}
-
-function render() {
-    switch(state.phase) {
-        case 'setup':
-            appDiv.innerHTML = `
-                <div class="p-6 md:p-16 flex-1 flex flex-col justify-center items-center text-center bg-white">
-                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-500/30 transform -rotate-3">
-                        <i class="fa-solid fa-brain text-5xl"></i>
-                    </div>
-                    <h1 class="text-4xl md:text-5xl font-black text-slate-800 mb-6 tracking-tight">Comprehensive Cognitive Battery</h1>
-                    <p class="text-lg text-slate-500 mb-10 max-w-2xl leading-relaxed">A professional-grade 5-phase psychometric assessment measuring Quantitative Reasoning, Spatial Logic, Working Memory, and Processing Speed.</p>
-                    
-                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 w-full max-w-md shadow-sm">
-                        <label class="block text-sm font-bold text-slate-700 mb-3 text-left">Subject's Chronological Age (Years)</label>
-                        <input type="number" id="ageInput" min="6" max="99" value="16" class="w-full p-4 border border-slate-300 rounded-xl mb-6 text-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono font-bold text-slate-700">
-                        <button onclick="(function(){
-                            let a = parseInt(document.getElementById('ageInput').value);
-                            if(a >= 6 && a <= 99) { state.ageMonths = a*12; state.phase = 'intro_gq'; render(); }
-                            else alert('Age must be 6-99');
-                        })()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-xl hover:bg-slate-900 transition-colors shadow-lg shadow-slate-800/20 text-lg flex justify-center items-center group">
-                            Initialize Assessment <i class="fa-solid fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
-                        </button>
-                    </div>
-                </div>`;
-            break;
-
-        case 'intro_gq':
-        case 'intro_gf':
-        case 'intro_wm_f':
-        case 'intro_wm_b':
-        case 'intro_gs':
-            const config = {
-                'intro_gq': { t: 'Phase 1: Quantitative Reasoning', icon: 'fa-hashtag', color: 'blue', desc: 'Identify the underlying mathematical rule to complete the numerical sequence.', btn: 'Start Phase 1', next: () => { state.phase = 'gq_test'; state.gq.currentQ = gen.math(1); state.gq.currentStart = Date.now(); render(); } },
-                'intro_gf': { t: 'Phase 2: Fluid Spatial Logic', icon: 'fa-shapes', color: 'indigo', desc: 'Analyze the grid of shapes and select the missing piece that completes the logical pattern.', btn: 'Start Phase 2', next: () => { state.phase = 'gf_test'; state.gf.currentQ = gen.spatial(1); state.gf.currentStart = Date.now(); render(); } },
-                'intro_wm_f': { t: 'Phase 3: Forward Working Memory', icon: 'fa-arrow-right-long', color: 'emerald', desc: 'Observe the sequence of flashing blocks. Tap them in the EXACT SAME order.', btn: 'Start Phase 3', next: () => { state.phase = 'wm_f_test'; generateWmSequence(false); } },
-                'intro_wm_b': { t: 'Phase 4: Backward Working Memory', icon: 'fa-arrow-left-long', color: 'amber', desc: 'Observe the sequence. You must tap them in the REVERSE order (backwards).', btn: 'Start Phase 4', next: () => { state.phase = 'wm_b_test'; generateWmSequence(true); } },
-                'intro_gs': { t: 'Phase 5: Processing Speed', icon: 'fa-bolt', color: 'rose', desc: 'You have 60 seconds. Does the target symbol appear in the group? Work as fast as possible.', btn: 'Start Final Phase', next: () => { state.phase = 'gs_test'; state.gs.active = true; state.gs.current = gen.symbols(); state.gs.timerId = setInterval(runGsTick, 1000); render(); } }
-            }[state.phase];
-
-            appDiv.innerHTML = `
-                ${TopBar('Instruction Set')}
-                <div class="p-10 flex-1 flex flex-col justify-center items-center text-center bg-white">
-                    <div class="w-20 h-20 bg-${config.color}-100 text-${config.color}-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-${config.color}-200">
-                        <i class="fa-solid ${config.icon} text-4xl"></i>
-                    </div>
-                    <h2 class="text-3xl font-bold text-slate-800 mb-4">${config.t}</h2>
-                    <p class="text-lg text-slate-600 mb-10 max-w-lg leading-relaxed">${config.desc}</p>
-                    <button id="startBtn" class="bg-${config.color}-600 text-white font-bold py-4 px-12 rounded-xl hover:bg-${config.color}-700 transition shadow-lg shadow-${config.color}-500/30 text-lg">
-                        ${config.btn}
-                    </button>
-                </div>`;
-            document.getElementById('startBtn').onclick = config.next;
-            break;
-
-        case 'gq_test':
-        case 'gf_test':
-            const isGq = state.phase === 'gq_test';
-            const d = isGq ? state.gq : state.gf;
-            const q = d.currentQ;
-            appDiv.innerHTML = `
-                ${TopBar(isGq ? 'Phase 1: Quantitative (Gq)' : 'Phase 2: Spatial (Gf)')}
-                <div class="w-full flex justify-between px-6 py-2 bg-slate-50 border-b text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    <span>Item ${d.count + 1} / ${d.max}</span>
-                    <span class="flex gap-1 items-center">Level ${'<div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>'.repeat(d.level)}${'<div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>'.repeat(4 - d.level)}</span>
-                </div>
-                <div class="flex-1 p-6 md:p-12 flex flex-col items-center justify-center bg-white">
-                    <div class="mb-12 w-full flex justify-center transform scale-110">
-                        ${q.html}
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
-                        ${q.opts.map((opt, i) => `
-                            <button onclick="handleAdaptiveAnswer('${isGq?'gq':'gf'}', ${i})" class="p-6 md:p-8 bg-white border-2 border-slate-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition flex items-center justify-center text-3xl font-black text-slate-700 shadow-sm hover:shadow-md h-32">
-                                ${q.isHtml ? opt : opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>`;
-            break;
-
-        case 'wm_f_test':
-        case 'wm_b_test':
-            const isBack = state.phase === 'wm_b_test';
-            const wd = isBack ? state.wm_b : state.wm_f;
-            appDiv.innerHTML = `
-                ${TopBar(isBack ? 'Phase 4: Backward Memory (Gwm-B)' : 'Phase 3: Forward Memory (Gwm-F)')}
-                <div class="flex-1 p-10 flex flex-col items-center justify-center relative bg-slate-50">
-                    <div id="wm-status" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10"></div>
-                    <div class="mb-8 text-center h-8 text-slate-700 font-bold text-xl uppercase tracking-widest ${wd.isFlashing ? 'animate-pulse text-blue-600' : ''}">
-                        ${wd.isFlashing ? 'Memorize...' : (isBack ? 'Recall Backwards!' : 'Recall Sequence!')}
-                    </div>
-                    <div class="grid grid-cols-3 gap-3 md:gap-5 w-full max-w-md mx-auto p-6 bg-white rounded-3xl shadow-sm border border-slate-200">
-                        ${[0,1,2,3,4,5,6,7,8].map(i => `
-                            <div id="wm-tile-${i}" onclick="handleWmClick(${i}, ${isBack})" class="wm-tile aspect-square bg-slate-100 rounded-2xl shadow-sm cursor-pointer ${wd.isFlashing ? 'pointer-events-none' : 'hover:bg-blue-50 border-2 border-transparent hover:border-blue-200'}"></div>
-                        `).join('')}
-                    </div>
-                </div>`;
-            break;
-
-        case 'gs_test':
-            renderGsTest();
-            break;
-
-        case 'results':
-            renderResults();
-            break;
-    }
-}
-
-function renderGsTest(partial = false) {
-    const html = `
-        ${!partial ? TopBar('Phase 5: Processing Speed (Gs)') : ''}
-        ${!partial ? `<div class="w-full flex justify-between px-6 py-3 bg-slate-800 text-white font-bold text-lg">
-            <span>Score: <span id="gs-score" class="text-rose-400">0</span></span>
-            <span><i class="fa-regular fa-clock mr-2"></i><span id="gs-timer">60</span>s</span>
-        </div>` : ''}
-        <div class="flex-1 p-8 flex flex-col items-center justify-center bg-white" id="gs-play-area">
-            <div class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Target Symbol</div>
-            <div class="text-7xl font-bold gs-symbol mb-12 text-slate-800 bg-slate-100 w-32 h-32 flex items-center justify-center rounded-2xl border-2 border-slate-200 shadow-inner">
-                ${state.gs.current?.target || ''}
+      function renderPhase2() {
+        const q = app.phase2.currentQuestion;
+        updateProgress(25 + Math.round((app.phase2.questionsAnswered / app.phase2.maxQuestions) * 20));
+        const matrixSVG = generateMatrixSVG(q.grid, 68, true);
+        const optionsHTML = q.options.map((opt, idx) => {
+          const singleSVG = generateSingleShapeSVG(opt, 80);
+          return `
+            <div class="matrix-option p-2 flex flex-col items-center gap-1" data-option-index="${idx}" id="matrixOpt${idx}">
+              <div class="option-svg-container w-full flex justify-center">${singleSVG}</div>
+              <span class="text-xs text-gray-500 font-medium">${idx + 1}</span>
             </div>
-            <div class="flex gap-4 md:gap-8 mb-12">
-                ${(state.gs.current?.opts || []).map(s => `<div class="text-5xl gs-symbol text-slate-600">${s}</div>`).join('')}
+          `;
+        }).join('');
+        render(`
+          <div>
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700"><i class="fas fa-th mr-1"></i> Phase 2: Spatial Logic</span>
+              <span class="text-xs text-gray-400">Matrix ${app.phase2.questionsAnswered + 1} of ${app.phase2.maxQuestions}</span>
+              <span class="text-xs text-gray-400">Difficulty: ${'●'.repeat(q.difficulty)}${'○'.repeat(10-q.difficulty)}</span>
             </div>
-            <div class="flex gap-6 w-full max-w-md">
-                <button onclick="handleGsAnswer(false)" class="flex-1 py-6 bg-white border-2 border-slate-200 rounded-xl text-xl font-bold text-slate-600 hover:bg-slate-50 shadow-sm hover:border-slate-400 transition">ABSENT</button>
-                <button onclick="handleGsAnswer(true)" class="flex-1 py-6 bg-rose-600 border-2 border-rose-600 rounded-xl text-xl font-bold text-white hover:bg-rose-700 shadow-sm hover:border-rose-700 transition shadow-rose-500/30">PRESENT</button>
+            <p class="text-sm text-gray-600 mb-3">Complete the pattern. Select the missing shape.</p>
+            <div class="flex justify-center mb-5 bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div class="w-full max-w-xs">${matrixSVG}</div>
             </div>
-        </div>`;
-    
-    if(!partial) appDiv.innerHTML = html;
-    else {
-        document.getElementById('gs-play-area').innerHTML = new DOMParser().parseFromString(html, 'text/html').getElementById('gs-play-area').innerHTML;
-        document.getElementById('gs-score').innerText = state.gs.score;
-    }
-}
+            <p class="text-sm text-gray-500 mb-2">Choose the correct shape:</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="matrixOptionsGrid">${optionsHTML}</div>
+            <div id="feedbackArea2" class="mt-4 text-center min-h-[2rem]"></div>
+          </div>
+        `);
+        const optionDivs = document.querySelectorAll('.matrix-option');
+        optionDivs.forEach(div => {
+          div.addEventListener('click', function() {
+            if (app.phase2.answerSelected) return;
+            app.phase2.answerSelected = true;
+            const selectedIndex = parseInt(this.getAttribute('data-option-index'));
+            const isCorrect = selectedIndex === q.correctIndex;
+            document.getElementById('matrixOpt' + q.correctIndex).classList.add('correct-flash');
+            if (!isCorrect) this.classList.add('incorrect-flash');
+            if (isCorrect) {
+              app.phase2.correctCount++; app.phase2.consecutiveCorrect++; app.phase2.consecutiveWrong = 0; app.phase2.totalDifficultySum += q.difficulty;
+              document.getElementById('feedbackArea2').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
+              if (app.phase2.consecutiveCorrect >= 2 && app.phase2.difficulty < 10) { app.phase2.difficulty++; app.phase2.consecutiveCorrect = 0; }
+            } else {
+              app.phase2.consecutiveWrong++; app.phase2.consecutiveCorrect = 0; app.phase2.totalDifficultySum += Math.max(1, q.difficulty - 2);
+              document.getElementById('feedbackArea2').innerHTML = '<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect</span>';
+              if (app.phase2.consecutiveWrong >= 2 && app.phase2.difficulty > 1) { app.phase2.difficulty--; app.phase2.consecutiveWrong = 0; }
+            }
+            app.phase2.questionsAnswered++;
+            optionDivs.forEach(d => d.style.pointerEvents = 'none');
+            setTimeout(() => {
+              if (app.phase2.questionsAnswered >= app.phase2.maxQuestions) { finishPhase2(); }
+              else { generatePhase2Question(); renderPhase2(); }
+            }, 800);
+          });
+        });
+      }
 
-function renderResults() {
-    // Psychometric Calculation Engine
-    const a = state.ageMonths/12;
-    // Expected baselines map to a curve peaking at age 22-25
-    const exp = (base) => a < 16 ? base * (a/16) : (a > 45 ? base - ((a-45)*0.1) : base);
-    
-    const calcIndex = (raw, max, expectedBase) => {
-        const expected = exp(expectedBase);
-        const z = (raw - expected) / (expected * 0.3); // SD roughly 30% of expected
-        return Math.min(150, Math.max(50, Math.round(100 + (z * 15))));
-    };
+      function finishPhase2() { app.results.gfRaw = app.phase2.correctCount; updateProgress(45); startPhase3(); }
 
-    // Raw scores weighted by difficulty (IRT approximation)
-    const rawGq = state.gq.history.reduce((acc, c) => acc + (c.correct ? c.level * 1.5 : 0), 0);
-    const rawGf = state.gf.history.reduce((acc, c) => acc + (c.correct ? c.level * 1.5 : 0), 0);
-    
-    // Index Scores (Mean=100, SD=15)
-    const iqGq = calcIndex(rawGq, state.gq.max * 6, 25);
-    const iqGf = calcIndex(rawGf, state.gf.max * 6, 30);
-    const iqGwm = calcIndex((state.wm_f.maxScore*2) + (state.wm_b.maxScore*3), 40, 18);
-    const iqGs = calcIndex(state.gs.score, 60, 35);
-
-    // Full Scale IQ (FSIQ) - Weighted Composite
-    const fsiq = Math.round((iqGq * 0.30) + (iqGf * 0.30) + (iqGwm * 0.25) + (iqGs * 0.15));
-
-    const getDesc = (iq) => iq >= 130 ? 'Very Superior' : iq >= 120 ? 'Superior' : iq >= 110 ? 'High Average' : iq >= 90 ? 'Average' : iq >= 80 ? 'Low Average' : 'Borderline';
-
-    appDiv.innerHTML = `
-        <div class="bg-slate-900 text-white p-8 md:p-12 relative overflow-hidden flex-shrink-0">
-            <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-                <i class="fa-solid fa-microchip text-[15rem]"></i>
+      // ──────────────────────────────────────
+      // PHASE 3 & 4: WORKING MEMORY (FORWARD & BACKWARD)
+      // ──────────────────────────────────────
+      function startPhase3() {
+        app.currentState = STATE.PHASE3;
+        app.phase3.currentSpan = 3; app.phase3.failuresAtCurrentSpan = 0; app.phase3.maxSpanAchieved = 2;
+        app.phase3.phaseComplete = false; app.phase3.userSequence = []; app.phase3.isFlashing = false; app.phase3.isAcceptingInput = false;
+        generateCorsiSequence('phase3'); renderPhase3();
+      }
+      function startPhase4() {
+        app.currentState = STATE.PHASE4;
+        app.phase4.currentSpan = 3; app.phase4.failuresAtCurrentSpan = 0; app.phase4.maxSpanAchieved = 2;
+        app.phase4.phaseComplete = false; app.phase4.userSequence = []; app.phase4.isFlashing = false; app.phase4.isAcceptingInput = false;
+        generateCorsiSequence('phase4'); renderPhase4();
+      }
+      function generateCorsiSequence(phaseKey) {
+        const phase = app[phaseKey]; const seq = []; const used = new Set();
+        for (let i = 0; i < phase.currentSpan; i++) { let cell; do { cell = Math.floor(Math.random() * 9); } while (used.has(cell) && used.size < 9); used.add(cell); seq.push(cell); }
+        phase.sequence = seq; phase.userSequence = []; phase.isFlashing = true; phase.isAcceptingInput = false; phase.flashIndex = 0;
+      }
+      function renderCorsiGrid(phaseKey) {
+        const phase = app[phaseKey];
+        const cellsHTML = Array.from({length:9}, (_,i) => `<div class="corsi-cell" data-cell-index="${i}" id="corsiCell${i}">${i+1}</div>`).join('');
+        const phaseLabel = phaseKey==='phase3'?'Forward Working Memory':'Backward Working Memory';
+        const phaseNum = phaseKey==='phase3'?'3':'4';
+        const instruction = phaseKey==='phase3'?'Watch the sequence. Then tap in <strong>same order</strong>.':'Watch the sequence. Then tap in <strong>reverse order</strong>.';
+        updateProgress(phaseKey==='phase3'?45+Math.min(10,Math.round((phase.maxSpanAchieved-2)/7*10)):55+Math.min(10,Math.round((phase.maxSpanAchieved-2)/7*10)));
+        return `
+          <div>
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-700"><i class="fas fa-th-large mr-1"></i> Phase ${phaseNum}: ${phaseLabel}</span>
+              <span class="text-xs text-gray-400">Span: ${phase.currentSpan} | Best: ${phase.maxSpanAchieved}</span>
             </div>
-            <h2 class="text-sm font-bold tracking-widest text-blue-400 uppercase mb-2">Psychometric Profile Report</h2>
-            <div class="text-4xl md:text-5xl font-black mb-1">FSIQ Estimate: ${fsiq}</div>
-            <div class="text-slate-400 font-medium">${getDesc(fsiq)} Classification</div>
-        </div>
-        
-        <div class="flex-1 p-6 md:p-10 bg-slate-50 overflow-y-auto">
-            <div class="grid md:grid-cols-2 gap-6 mb-8">
-                
-                <!-- Gf -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg">Fluid Reasoning (Gf)</h3>
-                            <p class="text-xs text-slate-500">Spatial matrices & logic</p>
-                        </div>
-                        <div class="text-3xl font-black text-indigo-600">${iqGf}</div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="bg-indigo-500 h-2.5 rounded-full" style="width: ${Math.max(5, (iqGf/150)*100)}%"></div>
-                    </div>
-                </div>
+            <p class="text-sm text-gray-600 mb-3">${instruction}</p>
+            <div class="grid grid-cols-3 gap-2 max-w-sm mx-auto mb-4" id="corsiGridContainer">${cellsHTML}</div>
+            <div id="corsiStatus" class="text-center text-sm font-semibold text-gray-500"><i class="fas fa-eye mr-1"></i> Watch carefully...</div>
+            <div id="corsiFeedback" class="text-center mt-2 min-h-[1.5rem]"></div>
+          </div>
+        `;
+      }
+      function renderPhase3() { render(renderCorsiGrid('phase3')); startCorsiFlashing('phase3'); }
+      function renderPhase4() { render(renderCorsiGrid('phase4')); startCorsiFlashing('phase4'); }
+      function startCorsiFlashing(phaseKey) {
+        const phase = app[phaseKey]; phase.isFlashing = true; phase.isAcceptingInput = false; phase.flashIndex = 0; phase.userSequence = [];
+        for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c){c.classList.remove('flash','user-selected','user-error'); c.style.pointerEvents='none';} }
+        function flashNext() {
+          if (phase.flashIndex < phase.sequence.length) {
+            const cell = document.getElementById('corsiCell'+phase.sequence[phase.flashIndex]);
+            if(cell) { cell.classList.add('flash'); document.getElementById('corsiStatus').innerHTML = `<i class="fas fa-eye mr-1"></i> Watch... (${phase.flashIndex+1}/${phase.sequence.length})`; }
+            setTimeout(() => { if(cell) cell.classList.remove('flash'); phase.flashIndex++; setTimeout(flashNext, 200); }, 500);
+          } else {
+            phase.isFlashing = false; phase.isAcceptingInput = true;
+            document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-hand-pointer mr-1"></i> Your turn!';
+            for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c) c.style.pointerEvents='auto'; }
+            setupCorsiClickHandlers(phaseKey);
+          }
+        }
+        setTimeout(flashNext, 400);
+      }
+      function setupCorsiClickHandlers(phaseKey) {
+        const phase = app[phaseKey];
+        const grid = document.getElementById('corsiGridContainer'); if(!grid) return;
+        const newGrid = grid.cloneNode(true); grid.parentNode.replaceChild(newGrid, grid);
+        newGrid.addEventListener('click', function(e) {
+          if (!phase.isAcceptingInput || phase.isFlashing) return;
+          const cellDiv = e.target.closest('.corsi-cell'); if(!cellDiv) return;
+          const idx = parseInt(cellDiv.getAttribute('data-cell-index')); if(isNaN(idx) || phase.userSequence.includes(idx)) return;
+          phase.userSequence.push(idx); cellDiv.classList.add('user-selected');
+          if (phase.userSequence.length === phase.sequence.length) {
+            phase.isAcceptingInput = false;
+            const target = phaseKey==='phase4' ? [...phase.sequence].reverse() : [...phase.sequence];
+            const correct = arraysEqual(phase.userSequence, target);
+            if (correct) {
+              phase.maxSpanAchieved = Math.max(phase.maxSpanAchieved, phase.currentSpan); phase.currentSpan++; phase.failuresAtCurrentSpan = 0;
+              document.getElementById('corsiFeedback').innerHTML = '<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> Correct! Span increasing.</span>';
+            } else {
+              phase.failuresAtCurrentSpan++;
+              phase.userSequence.forEach(i => { const c=document.getElementById('corsiCell'+i); if(c) {c.classList.remove('user-selected'); c.classList.add('user-error');} });
+              if (phase.failuresAtCurrentSpan >= 2) { phase.phaseComplete = true; document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-flag-checkered"></i> Phase complete.'; }
+              else { document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-redo"></i> Try again.'; }
+              document.getElementById('corsiFeedback').innerHTML = '<span class="text-red-600 font-bold"><i class="fas fa-times-circle"></i> Incorrect sequence.</span>';
+            }
+            for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c) c.style.pointerEvents='none'; }
+            setTimeout(() => {
+              if (phase.phaseComplete) {
+                if (phaseKey==='phase3') { app.results.gwmFRaw = phase.maxSpanAchieved; updateProgress(55); startPhase4(); }
+                else { app.results.gwmBRaw = phase.maxSpanAchieved; updateProgress(65); startPhase5(); }
+              } else { generateCorsiSequence(phaseKey); phaseKey==='phase3' ? renderPhase3() : renderPhase4(); }
+            }, 1200);
+          }
+        });
+      }
 
-                <!-- Gq -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg">Quantitative (Gq)</h3>
-                            <p class="text-xs text-slate-500">Arithmetic progressions</p>
-                        </div>
-                        <div class="text-3xl font-black text-blue-600">${iqGq}</div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="bg-blue-500 h-2.5 rounded-full" style="width: ${Math.max(5, (iqGq/150)*100)}%"></div>
-                    </div>
-                </div>
-
-                <!-- Gwm -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg">Working Memory (Gwm)</h3>
-                            <p class="text-xs text-slate-500">Forward/Backward Span</p>
-                        </div>
-                        <div class="text-3xl font-black text-emerald-600">${iqGwm}</div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="bg-emerald-500 h-2.5 rounded-full" style="width: ${Math.max(5, (iqGwm/150)*100)}%"></div>
-                    </div>
-                </div>
-
-                <!-- Gs -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg">Processing Speed (Gs)</h3>
-                            <p class="text-xs text-slate-500">Rapid symbol matching</p>
-                        </div>
-                        <div class="text-3xl font-black text-rose-600">${iqGs}</div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: ${Math.max(5, (iqGs/150)*100)}%"></div>
-                    </div>
-                </div>
+      // ──────────────────────────────────────
+      // PHASE 5: PROCESSING SPEED (Gs)
+      // ──────────────────────────────────────
+      function startPhase5() {
+        app.currentState = STATE.PHASE5;
+        app.phase5.timeRemaining = 60; app.phase5.score = 0; app.phase5.trialsCompleted = 0;
+        app.phase5.phaseActive = true; app.phase5.answerLocked = false; app.phase5.timerInterval = null;
+        generatePhase5Trial(); renderPhase5(); startPhase5Timer();
+      }
+      function generatePhase5Trial() {
+        const symbols = ['α','β','γ','δ','ε','ζ','η','θ','λ','μ','π','σ','φ','ψ','ω'];
+        const target = symbols[Math.floor(Math.random()*symbols.length)];
+        const others = symbols.filter(s=>s!==target); shuffleArray(others);
+        const options = others.slice(0,4);
+        const present = Math.random()<0.5;
+        if(present) options[Math.floor(Math.random()*4)] = target;
+        app.phase5.currentTrial = { target, options, targetPresent: present };
+        app.phase5.answerLocked = false;
+      }
+      function renderPhase5() {
+        const t = app.phase5.currentTrial;
+        const pct = (app.phase5.timeRemaining/60)*100;
+        updateProgress(65+Math.round((60-app.phase5.timeRemaining)/60*30));
+        render(`
+          <div>
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700"><i class="fas fa-bolt mr-1"></i> Phase 5: Processing Speed</span>
+              <span class="text-xs text-gray-400">Score: ${app.phase5.score}</span>
             </div>
-            
-            <div class="bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 text-sm flex gap-3">
-                <i class="fa-solid fa-circle-info mt-0.5"></i>
-                <p><strong>Clinical Disclaimer:</strong> This engine utilizes heuristic standardization based on an inputted chronological age of <strong>${a} years</strong>. It does not replace a proctored clinical instrument (e.g., WAIS-IV, WISC-V).</p>
+            <div class="flex items-center gap-4 mb-4"><div class="flex-1 h-4 bg-gray-200 rounded-full"><div class="h-full rounded-full" style="width:${pct}%; background:${pct>30?'#5D9B7C':pct>15?'#C49B5C':'#B85C5C'};"></div></div><span class="text-2xl font-bold" id="timerDisplay">${app.phase5.timeRemaining}s</span></div>
+            <div class="bg-gray-50 rounded-xl p-5 mb-4 text-center"><p class="text-sm text-gray-500">Target:</p><p class="text-5xl font-bold">${t.target}</p></div>
+            <div class="flex justify-center gap-2 text-3xl font-bold text-gray-600 bg-white rounded-xl p-4 border flex-wrap">${t.options.map(s=>`<span class="px-2">${s}</span>`).join('<span class="text-gray-300">|</span>')}</div>
+            <div class="flex gap-3 justify-center mt-5" id="psButtons">
+              <button id="btnPresent" class="btn-primary bg-green-600 px-6 py-3">PRESENT</button>
+              <button id="btnAbsent" class="btn-primary px-6 py-3" style="background:linear-gradient(135deg,#B85C5C,#9B4A4A);">ABSENT</button>
             </div>
-        </div>
-    `;
-}
+            <div id="psFeedback" class="text-center mt-3 font-semibold"></div>
+          </div>
+        `);
+        document.getElementById('btnPresent').onclick = ()=>handlePhase5Answer(true);
+        document.getElementById('btnAbsent').onclick = ()=>handlePhase5Answer(false);
+      }
+      function handlePhase5Answer(userPresent) {
+        if(!app.phase5.phaseActive || app.phase5.answerLocked) return;
+        app.phase5.answerLocked = true;
+        const correct = (userPresent === app.phase5.currentTrial.targetPresent);
+        app.phase5.score += correct ? 1 : -1; app.phase5.trialsCompleted++;
+        document.getElementById('psFeedback').innerHTML = correct ? '<span class="text-green-600">Correct! +1</span>' : '<span class="text-red-600">Incorrect! -1</span>';
+        document.getElementById('btnPresent').disabled = document.getElementById('btnAbsent').disabled = true;
+        setTimeout(() => { if(app.phase5.phaseActive) { generatePhase5Trial(); renderPhase5(); } }, 350);
+      }
+      function startPhase5Timer() {
+        app.phase5.timerInterval = setInterval(() => {
+          app.phase5.timeRemaining--;
+          const disp = document.getElementById('timerDisplay'); if(disp) disp.textContent = app.phase5.timeRemaining+'s';
+          updateProgress(65+Math.round((60-app.phase5.timeRemaining)/60*30));
+          if(app.phase5.timeRemaining <= 0) finishPhase5();
+        }, 1000);
+      }
+      function finishPhase5() {
+        app.phase5.phaseActive = false; clearInterval(app.phase5.timerInterval);
+        app.results.gsRaw = app.phase5.score; updateProgress(100);
+        setTimeout(calculateAndRenderResults, 400);
+      }
 
-render();
-</script>
+      // ──────────────────────────────────────
+      // SCORING & RESULTS
+      // ──────────────────────────────────────
+      function calculateAndRenderResults() {
+        const age = app.chronologicalAge, peak=23, ageFactor=Math.max(0.55,1-Math.abs(age-peak)*0.025);
+        const gqZ = (app.results.gqRaw - 13*ageFactor)/3.5; app.results.gqIQ = Math.round(100+gqZ*15);
+        const gfZ = (app.results.gfRaw - 16*ageFactor)/4; app.results.gfIQ = Math.round(100+gfZ*15);
+        const gwmComp = app.results.gwmFRaw + app.results.gwmBRaw;
+        const gwmZ = (gwmComp - 11*ageFactor)/2.8; app.results.gwmIQ = Math.round(100+gwmZ*15);
+        const gsZ = (app.results.gsRaw - 18*ageFactor)/8; app.results.gsIQ = Math.round(100+gsZ*15);
+        app.results.fsiq = Math.round(app.results.gqIQ*0.3 + app.results.gfIQ*0.3 + app.results.gwmIQ*0.25 + app.results.gsIQ*0.15);
+        const fsiq = app.results.fsiq;
+        app.results.classification = fsiq>=130?'Very Superior':fsiq>=120?'Superior':fsiq>=110?'High Average':fsiq>=90?'Average':fsiq>=80?'Low Average':fsiq>=70?'Borderline':'Extremely Low';
+        app.currentState = STATE.RESULTS; renderResults();
+      }
+      function renderResults() {
+        updateProgress(100);
+        const r = app.results;
+        const iqBar = (iq) => `<div class="h-3 bg-gray-200 rounded-full flex-1"><div class="iq-bar-fill" style="width:${Math.max(2,Math.min(98,((iq-40)/120)*100))}%; background:${iq<80?'#B85C5C':iq<90?'#C49B5C':iq<110?'#5B8CBF':iq<120?'#5D9B7C':'#7B5EA7'};"></div></div>`;
+        render(`
+          <div>
+            <div class="text-center mb-6">
+              <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-3 shadow-lg"><span class="text-3xl font-extrabold">${r.fsiq}</span></div>
+              <h2 class="text-xl font-bold">Estimated Full Scale IQ (FSIQ)</h2>
+              <p class="text-lg font-semibold text-blue-600">${r.classification}</p>
+              <p class="text-xs text-gray-400">Mean 100, SD 15 · Age-normed for ${app.chronologicalAge} years</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-calculator text-blue-500"></i> Quantitative (Gq)</span><span class="font-bold">${r.gqIQ}</span></div>${iqBar(r.gqIQ)}<span class="text-xs text-gray-400">Raw: ${r.gqRaw}/20</span></div>
+              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-th text-purple-500"></i> Spatial Logic (Gf)</span><span class="font-bold">${r.gfIQ}</span></div>${iqBar(r.gfIQ)}<span class="text-xs text-gray-400">Raw: ${r.gfRaw}/25</span></div>
+              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-memory text-teal-500"></i> Working Memory (Gwm)</span><span class="font-bold">${r.gwmIQ}</span></div>${iqBar(r.gwmIQ)}<span class="text-xs text-gray-400">Fwd: ${r.gwmFRaw} | Bwd: ${r.gwmBRaw}</span></div>
+              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-bolt text-orange-500"></i> Processing Speed (Gs)</span><span class="font-bold">${r.gsIQ}</span></div>${iqBar(r.gsIQ)}<span class="text-xs text-gray-400">Net: ${r.gsRaw>0?'+':''}${r.gsRaw} (60s)</span></div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-xs text-amber-800">
+              <p class="font-semibold mb-1"><i class="fas fa-exclamation-triangle"></i> Clinical Disclaimer</p>
+              <p>This is an informational estimation only, not a diagnostic instrument. Real IQ assessment requires standardized administration by a licensed psychologist.</p>
+            </div>
+            <div class="text-center"><button id="btnRestart" class="btn-outline px-6 py-3"><i class="fas fa-redo"></i> Restart Assessment</button></div>
+          </div>
+        `);
+        document.getElementById('btnRestart').onclick = ()=>{ resetApp(); renderInit(); };
+      }
+
+      function shuffleArray(arr) { for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+      function arraysEqual(a,b) { return a.length===b.length && a.every((v,i)=>v===b[i]); }
+      function resetApp() {
+        clearInterval(app.phase5.timerInterval);
+        app.phase1 = { difficulty:5,consecutiveCorrect:0,consecutiveWrong:0,questionsAnswered:0,maxQuestions:20,correctCount:0,currentQuestion:null,answerSelected:false,totalDifficultySum:0 };
+        app.phase2 = { difficulty:5,consecutiveCorrect:0,consecutiveWrong:0,questionsAnswered:0,maxQuestions:25,correctCount:0,currentQuestion:null,answerSelected:false,totalDifficultySum:0 };
+        app.phase3 = { currentSpan:3,sequence:[],userSequence:[],isFlashing:false,isAcceptingInput:false,failuresAtCurrentSpan:0,maxSpanAchieved:2,phaseComplete:false,flashIndex:0,totalAttempts:0 };
+        app.phase4 = { currentSpan:3,sequence:[],userSequence:[],isFlashing:false,isAcceptingInput:false,failuresAtCurrentSpan:0,maxSpanAchieved:2,phaseComplete:false,flashIndex:0,totalAttempts:0 };
+        app.phase5 = { timeRemaining:60,totalTime:60,score:0,trialsCompleted:0,timerInterval:null,currentTrial:null,phaseActive:false,answerLocked:false };
+        app.results = { gqRaw:0,gfRaw:0,gwmFRaw:0,gwmBRaw:0,gsRaw:0,gqIQ:0,gfIQ:0,gwmIQ:0,gsIQ:0,fsiq:0,classification:'' };
+        updateProgress(0);
+      }
+
+      renderInit();
+    })();
+  </script>
 </body>
 </html>
-
-
-```
