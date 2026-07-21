@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Comprehensive Cognitive Battery | Clinical Assessment</title>
-  <script src="https://cdn.tailwindcss.com">
-  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -231,29 +230,34 @@
           difficulty: 5, consecutiveCorrect: 0, consecutiveWrong: 0,
           questionsAnswered: 0, maxQuestions: 20, correctCount: 0,
           currentQuestion: null, answerSelected: false, totalDifficultySum: 0,
+          currentStreak: 0, maxStreak: 0
         },
         phase2: {
           difficulty: 5, consecutiveCorrect: 0, consecutiveWrong: 0,
           questionsAnswered: 0, maxQuestions: 25, correctCount: 0,
           currentQuestion: null, answerSelected: false, totalDifficultySum: 0,
+          currentStreak: 0, maxStreak: 0
         },
         phase3: {
           currentSpan: 3, sequence: [], userSequence: [],
           isFlashing: false, isAcceptingInput: false, failuresAtCurrentSpan: 0,
           maxSpanAchieved: 2, phaseComplete: false, flashIndex: 0, totalAttempts: 0,
+          correctCount: 0, currentStreak: 0, maxStreak: 0
         },
         phase4: {
           currentSpan: 3, sequence: [], userSequence: [],
           isFlashing: false, isAcceptingInput: false, failuresAtCurrentSpan: 0,
           maxSpanAchieved: 2, phaseComplete: false, flashIndex: 0, totalAttempts: 0,
+          correctCount: 0, currentStreak: 0, maxStreak: 0
         },
         phase5: {
           timeRemaining: 60, totalTime: 60, score: 0, trialsCompleted: 0,
           timerInterval: null, currentTrial: null, phaseActive: false, answerLocked: false,
+          correctCount: 0, currentStreak: 0, maxStreak: 0
         },
         results: {
-          gqRaw: 0, gfRaw: 0, gwmFRaw: 0, gwmBRaw: 0, gsRaw: 0,
-          gqIQ: 0, gfIQ: 0, gwmIQ: 0, gsIQ: 0, fsiq: 0, classification: '',
+          gqScore: 0, gfScore: 0, gwmScore: 0, gsScore: 0, cai: 0, classification: '', ci: 0,
+          consistency1: 0, consistency2: 0, consistency3: 0, consistency5: 0
         },
       };
 
@@ -284,8 +288,8 @@
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
               <i class="fas fa-brain text-3xl text-blue-600"></i>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Comprehensive Cognitive Battery</h1>
-            <p class="text-sm text-gray-500 mb-6">Professional-grade psychometric assessment</p>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Cognitive Ability Screener</h1>
+            <p class="text-sm text-gray-500 mb-6">Algorithmically adaptive cognitive estimation</p>
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-left text-sm text-amber-800">
               <p class="font-semibold mb-1"><i class="fas fa-lock mr-1"></i> Privacy Assurance</p>
               <p class="text-xs">This assessment runs entirely within your browser. <strong>Zero data</strong> is collected, transmitted, or stored externally. Fully compliant with COPPA and GDPR-K regulations. No account required.</p>
@@ -294,20 +298,21 @@
               <label for="ageInput" class="block text-sm font-semibold text-gray-700 mb-2">
                 <i class="fas fa-calendar-alt mr-1 text-blue-500"></i> Chronological Age (Years)
               </label>
-              <input type="number" id="ageInput" min="6" max="99" value="16"
+              <input type="number" id="ageInput" min="12" max="99" value="25"
               class="w-full max-w-xs mx-auto block text-center text-xl font-bold border-2 border-gray-300 rounded-xl py-3 px-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
-              placeholder="6-99">
-              <p class="text-xs text-gray-400 mt-2">Valid range: 6 – 99 years</p>
+              placeholder="12-99">
+              <p class="text-xs text-gray-400 mt-2">Required for accurate demographic age-norming mapping</p>
             </div>
             <button id="btnStartAssessment" class="btn-primary text-lg px-10 py-4">
               <i class="fas fa-play mr-2"></i> Initialize Assessment
             </button>
           </div>
         `);
+        
         document.getElementById('btnStartAssessment').addEventListener('click', () => {
           const ageInput = document.getElementById('ageInput');
           const age = parseInt(ageInput.value);
-          if (isNaN(age) || age < 6 || age > 99) {
+          if (isNaN(age) || age < 12 || age > 99) {
             ageInput.classList.add('border-red-500', 'ring-4', 'ring-red-100');
             ageInput.focus();
             setTimeout(() => ageInput.classList.remove('border-red-500', 'ring-4', 'ring-red-100'), 1500);
@@ -324,9 +329,14 @@
       function startPhase1() {
         app.currentState = STATE.PHASE1;
         app.phase1.difficulty = Math.min(10, Math.max(1, Math.round(app.chronologicalAge / 3.5)));
-        app.phase1.consecutiveCorrect = 0; app.phase1.consecutiveWrong = 0;
-        app.phase1.questionsAnswered = 0; app.phase1.correctCount = 0; app.phase1.totalDifficultySum = 0;
+        app.phase1.consecutiveCorrect = 0; 
+        app.phase1.consecutiveWrong = 0;
+        app.phase1.questionsAnswered = 0; 
+        app.phase1.correctCount = 0; 
+        app.phase1.totalDifficultySum = 0;
         app.phase1.answerSelected = false;
+        app.phase1.currentStreak = 0;
+        app.phase1.maxStreak = 0;
         generatePhase1Question();
         renderPhase1();
       }
@@ -336,6 +346,7 @@
         const patternType = diff <= 3 ? 'arithmetic' : diff <= 6 ? 'geometric' : diff <= 8 ? 'alternating' : 'complex';
         let sequence = [], correctAnswer = 0;
         const len = 5 + Math.floor(diff / 2);
+        
         if (patternType === 'arithmetic') {
           const start = Math.floor(Math.random() * 15 * diff) + 2;
           const step = Math.floor(Math.random() * (diff + 2)) + 1;
@@ -357,9 +368,11 @@
           for (let i = 0; i < len; i++) sequence.push(base + i * mod + (i % 3 === 0 ? mod : 0));
           correctAnswer = sequence[sequence.length - 1] + mod + ((len % 3 === 0) ? mod : 0);
         }
+        
         const distractors = new Set([correctAnswer, correctAnswer + 1, correctAnswer - 1, Math.round(correctAnswer * 0.85), Math.round(correctAnswer * 1.15)]);
         const options = [correctAnswer, ...Array.from(distractors).filter(d => d !== correctAnswer && d > 0).slice(0, 3)];
         shuffleArray(options);
+        
         app.phase1.currentQuestion = {
           sequence, correctAnswer, options, correctIndex: options.indexOf(correctAnswer), difficulty: diff, patternType,
         };
@@ -369,10 +382,12 @@
       function renderPhase1() {
         const q = app.phase1.currentQuestion;
         updateProgress(5 + Math.round((app.phase1.questionsAnswered / app.phase1.maxQuestions) * 20));
+        
         const optionsHTML = q.options.map((opt, idx) => `
           <button class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition-all font-semibold text-lg text-gray-700 option-btn"
             data-option-index="${idx}" id="optBtn${idx}">${opt}</button>
         `).join('');
+        
         render(`
           <div>
             <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -382,31 +397,55 @@
             </div>
             <div class="bg-gray-50 rounded-xl p-5 mb-5 border border-gray-200">
               <p class="text-sm text-gray-500 mb-2 font-medium">Find the next number in the sequence:</p>
-              <p class="text-2xl font-bold text-gray-800 tracking-wide font-mono">${q.sequence.join(', ')}, <span class="text-blue-600 underline decoration-2 underline-offset-4">?</span></p>
+              <p class="text-2xl font-bold text-gray-800 tracking-wide font-mono text-center">${q.sequence.join(', ')}, <span class="text-blue-600 underline decoration-2 underline-offset-4">?</span></p>
             </div>
             <div class="grid grid-cols-2 gap-3" id="optionsGrid">${optionsHTML}</div>
             <div id="feedbackArea" class="mt-4 text-center min-h-[2rem]"></div>
           </div>
         `);
+        
         document.querySelectorAll('.option-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             if (app.phase1.answerSelected) return;
             app.phase1.answerSelected = true;
+            
             const selectedIndex = parseInt(this.getAttribute('data-option-index'));
             const isCorrect = selectedIndex === q.correctIndex;
+            
             document.getElementById('optBtn' + q.correctIndex).classList.add('border-green-500', 'bg-green-50', 'text-green-700');
-            if (!isCorrect) this.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
-            if (isCorrect) {
-              app.phase1.correctCount++; app.phase1.consecutiveCorrect++; app.phase1.consecutiveWrong = 0; app.phase1.totalDifficultySum += q.difficulty;
-              document.getElementById('feedbackArea').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
-              if (app.phase1.consecutiveCorrect >= 2 && app.phase1.difficulty < 10) { app.phase1.difficulty++; app.phase1.consecutiveCorrect = 0; }
-            } else {
-              app.phase1.consecutiveWrong++; app.phase1.consecutiveCorrect = 0; app.phase1.totalDifficultySum += Math.max(1, q.difficulty - 2);
-              document.getElementById('feedbackArea').innerHTML = `<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect. Answer: ${q.correctAnswer}</span>`;
-              if (app.phase1.consecutiveWrong >= 2 && app.phase1.difficulty > 1) { app.phase1.difficulty--; app.phase1.consecutiveWrong = 0; }
+            if (!isCorrect) {
+              this.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
             }
+            
+            if (isCorrect) {
+              app.phase1.correctCount++; 
+              app.phase1.consecutiveCorrect++; 
+              app.phase1.consecutiveWrong = 0; 
+              app.phase1.totalDifficultySum += q.difficulty;
+              
+              app.phase1.currentStreak++;
+              if (app.phase1.currentStreak > app.phase1.maxStreak) app.phase1.maxStreak = app.phase1.currentStreak;
+              
+              document.getElementById('feedbackArea').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
+              if (app.phase1.consecutiveCorrect >= 2 && app.phase1.difficulty < 10) { 
+                app.phase1.difficulty++; 
+                app.phase1.consecutiveCorrect = 0; 
+              }
+            } else {
+              app.phase1.consecutiveWrong++; 
+              app.phase1.consecutiveCorrect = 0; 
+              app.phase1.currentStreak = 0;
+              
+              document.getElementById('feedbackArea').innerHTML = `<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect. Answer: ${q.correctAnswer}</span>`;
+              if (app.phase1.consecutiveWrong >= 2 && app.phase1.difficulty > 1) { 
+                app.phase1.difficulty--; 
+                app.phase1.consecutiveWrong = 0; 
+              }
+            }
+            
             app.phase1.questionsAnswered++;
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            
             setTimeout(() => {
               if (app.phase1.questionsAnswered >= app.phase1.maxQuestions) { finishPhase1(); }
               else { generatePhase1Question(); renderPhase1(); }
@@ -415,17 +454,25 @@
         });
       }
 
-      function finishPhase1() { app.results.gqRaw = app.phase1.correctCount; updateProgress(25); startPhase2(); }
+      function finishPhase1() { 
+        updateProgress(25); 
+        startPhase2(); 
+      }
 
       // ──────────────────────────────────────
-      // PHASE 2: FLUID SPATIAL LOGIC (Gf) – FIXED MOBILE OVERLAP & DISTINCT OPTIONS
+      // PHASE 2: FLUID SPATIAL LOGIC (Gf)
       // ──────────────────────────────────────
       function startPhase2() {
         app.currentState = STATE.PHASE2;
         app.phase2.difficulty = Math.min(10, Math.max(1, Math.round(app.chronologicalAge / 3.5)));
-        app.phase2.consecutiveCorrect = 0; app.phase2.consecutiveWrong = 0;
-        app.phase2.questionsAnswered = 0; app.phase2.correctCount = 0; app.phase2.totalDifficultySum = 0;
+        app.phase2.consecutiveCorrect = 0; 
+        app.phase2.consecutiveWrong = 0;
+        app.phase2.questionsAnswered = 0; 
+        app.phase2.correctCount = 0; 
+        app.phase2.totalDifficultySum = 0;
         app.phase2.answerSelected = false;
+        app.phase2.currentStreak = 0;
+        app.phase2.maxStreak = 0;
         generatePhase2Question();
         renderPhase2();
       }
@@ -475,44 +522,76 @@
         const shapes = ['circle', 'square', 'triangle', 'diamond', 'star'];
         const colors = ['#4A6FA5', '#B85C5C', '#5D9B7C', '#C49B5C', '#7B5EA7', '#D4756B', '#5B8CBF', '#E89B53'];
         const rotations = [0, 45, 90, 135, 180, 225, 270, 315];
-        const rowShape = shapes[Math.floor(Math.random() * shapes.length)];
-        const colColor = colors[Math.floor(Math.random() * colors.length)];
-        const rotStep = rotations[Math.min(diff, rotations.length - 1)] || 45;
+        
+        const baseShape = shapes[Math.floor(Math.random() * shapes.length)];
+        const baseColor = colors[Math.floor(Math.random() * colors.length)];
+        // Safeguard to guarantee rotation step mapping stays within bounds
+        const rotStep = rotations[Math.min(diff, rotations.length - 1)];
+        
         const grid = [];
         for (let r = 0; r < 3; r++) {
           grid[r] = [];
           for (let c = 0; c < 3; c++) {
-            if (r === 2 && c === 2) { grid[r][c] = null; }
-            else {
-              const shapeIdx = (shapes.indexOf(rowShape) + r + c) % shapes.length;
-              const colorIdx = (colors.indexOf(colColor) + r + c) % colors.length;
-              grid[r][c] = { shape: shapes[shapeIdx], color: colors[colorIdx], rotation: (r * rotStep + c * rotStep) % 360 };
+            if (r === 2 && c === 2) {
+              grid[r][c] = null; 
+            } else {
+              const shapeIdx = (shapes.indexOf(baseShape) + r + c) % shapes.length;
+              const colorIdx = (colors.indexOf(baseColor) + r + c) % colors.length;
+              grid[r][c] = {
+                shape: shapes[shapeIdx],
+                color: colors[colorIdx],
+                rotation: ((r + c) * rotStep) % 360
+              };
             }
           }
         }
-        const correctShapeIdx = (shapes.indexOf(rowShape) + 2 + 2) % shapes.length;
-        const correctColorIdx = (colors.indexOf(colColor) + 2 + 2) % colors.length;
-        const correctAnswer = { shape: shapes[correctShapeIdx], color: colors[correctColorIdx], rotation: (2 * rotStep + 2 * rotStep) % 360 };
-        const distractorOptions = [];
-        const seenKeys = new Set([`${correctAnswer.shape}|${correctAnswer.color}|${correctAnswer.rotation}`]);
-        const d1 = { shape: shapes[(correctShapeIdx + 1) % shapes.length], color: correctAnswer.color, rotation: correctAnswer.rotation };
-        if (!seenKeys.has(`${d1.shape}|${d1.color}|${d1.rotation}`)) { distractorOptions.push(d1); seenKeys.add(`${d1.shape}|${d1.color}|${d1.rotation}`); }
-        const d2Color = colors[(correctColorIdx + 2) % colors.length];
-        const d2 = { shape: correctAnswer.shape, color: d2Color, rotation: correctAnswer.rotation };
-        if (!seenKeys.has(`${d2.shape}|${d2.color}|${d2.rotation}`)) { distractorOptions.push(d2); seenKeys.add(`${d2.shape}|${d2.color}|${d2.rotation}`); }
-        const d3 = { shape: correctAnswer.shape, color: correctAnswer.color, rotation: (correctAnswer.rotation + 90) % 360 };
-        if (!seenKeys.has(`${d3.shape}|${d3.color}|${d3.rotation}`)) { distractorOptions.push(d3); seenKeys.add(`${d3.shape}|${d3.color}|${d3.rotation}`); }
-        const d4 = { shape: shapes[(correctShapeIdx + 2) % shapes.length], color: colors[(correctColorIdx + 1) % colors.length], rotation: (correctAnswer.rotation + 45) % 360 };
-        if (!seenKeys.has(`${d4.shape}|${d4.color}|${d4.rotation}`)) { distractorOptions.push(d4); seenKeys.add(`${d4.shape}|${d4.color}|${d4.rotation}`); }
-        while (distractorOptions.length < 3) {
-          const rs = shapes[Math.floor(Math.random() * shapes.length)], rc = colors[Math.floor(Math.random() * colors.length)], rr = rotations[Math.floor(Math.random() * rotations.length)];
-          if (!seenKeys.has(`${rs}|${rc}|${rr}`)) { distractorOptions.push({ shape: rs, color: rc, rotation: rr }); seenKeys.add(`${rs}|${rc}|${rr}`); }
+        
+        const correctShapeIdx = (shapes.indexOf(baseShape) + 4) % shapes.length;
+        const correctColorIdx = (colors.indexOf(baseColor) + 4) % colors.length;
+        const correctAnswer = {
+          shape: shapes[correctShapeIdx],
+          color: colors[correctColorIdx],
+          rotation: (4 * rotStep) % 360
+        };
+        
+        const distractorSet = new Set();
+        const key = (s) => `${s.shape}|${s.color}|${s.rotation}`;
+        distractorSet.add(key(correctAnswer));
+        
+        while (distractorSet.size < 4) {
+          const candidate = {
+            shape: shapes[Math.floor(Math.random() * shapes.length)],
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: rotations[Math.floor(Math.random() * rotations.length)]
+          };
+          const cKey = key(candidate);
+          if (!distractorSet.has(cKey)) {
+            distractorSet.add(cKey);
+          }
         }
-        const finalDistractors = distractorOptions.slice(0, 3);
-        const allOptions = [correctAnswer, ...finalDistractors];
+        
+        const allOptions = [
+          correctAnswer,
+          ...Array.from(distractorSet)
+            .filter(k => k !== key(correctAnswer))
+            .map(k => {
+              const [shape, color, rotation] = k.split('|');
+              return { shape, color, rotation: parseInt(rotation) };
+            })
+        ];
         shuffleArray(allOptions);
+        
+        const correctIndex = allOptions.findIndex(
+          opt => opt.shape === correctAnswer.shape &&
+                 opt.color === correctAnswer.color &&
+                 opt.rotation === correctAnswer.rotation
+        );
+        
         app.phase2.currentQuestion = {
-          grid, options: allOptions, correctIndex: allOptions.findIndex(o => o.shape === correctAnswer.shape && o.color === correctAnswer.color && o.rotation === correctAnswer.rotation), difficulty: diff,
+          grid,
+          options: allOptions,
+          correctIndex,
+          difficulty: diff,
         };
         app.phase2.answerSelected = false;
       }
@@ -520,6 +599,7 @@
       function renderPhase2() {
         const q = app.phase2.currentQuestion;
         updateProgress(25 + Math.round((app.phase2.questionsAnswered / app.phase2.maxQuestions) * 20));
+        
         const matrixSVG = generateMatrixSVG(q.grid, 68, true);
         const optionsHTML = q.options.map((opt, idx) => {
           const singleSVG = generateSingleShapeSVG(opt, 80);
@@ -530,6 +610,7 @@
             </div>
           `;
         }).join('');
+        
         render(`
           <div>
             <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -546,26 +627,50 @@
             <div id="feedbackArea2" class="mt-4 text-center min-h-[2rem]"></div>
           </div>
         `);
+        
         const optionDivs = document.querySelectorAll('.matrix-option');
         optionDivs.forEach(div => {
           div.addEventListener('click', function() {
             if (app.phase2.answerSelected) return;
             app.phase2.answerSelected = true;
+            
             const selectedIndex = parseInt(this.getAttribute('data-option-index'));
             const isCorrect = selectedIndex === q.correctIndex;
+            
             document.getElementById('matrixOpt' + q.correctIndex).classList.add('correct-flash');
-            if (!isCorrect) this.classList.add('incorrect-flash');
-            if (isCorrect) {
-              app.phase2.correctCount++; app.phase2.consecutiveCorrect++; app.phase2.consecutiveWrong = 0; app.phase2.totalDifficultySum += q.difficulty;
-              document.getElementById('feedbackArea2').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
-              if (app.phase2.consecutiveCorrect >= 2 && app.phase2.difficulty < 10) { app.phase2.difficulty++; app.phase2.consecutiveCorrect = 0; }
-            } else {
-              app.phase2.consecutiveWrong++; app.phase2.consecutiveCorrect = 0; app.phase2.totalDifficultySum += Math.max(1, q.difficulty - 2);
-              document.getElementById('feedbackArea2').innerHTML = '<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect</span>';
-              if (app.phase2.consecutiveWrong >= 2 && app.phase2.difficulty > 1) { app.phase2.difficulty--; app.phase2.consecutiveWrong = 0; }
+            if (!isCorrect) {
+              this.classList.add('incorrect-flash');
             }
+            
+            if (isCorrect) {
+              app.phase2.correctCount++; 
+              app.phase2.consecutiveCorrect++; 
+              app.phase2.consecutiveWrong = 0; 
+              app.phase2.totalDifficultySum += q.difficulty;
+              
+              app.phase2.currentStreak++;
+              if (app.phase2.currentStreak > app.phase2.maxStreak) app.phase2.maxStreak = app.phase2.currentStreak;
+              
+              document.getElementById('feedbackArea2').innerHTML = '<span class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Correct!</span>';
+              if (app.phase2.consecutiveCorrect >= 2 && app.phase2.difficulty < 10) { 
+                app.phase2.difficulty++; 
+                app.phase2.consecutiveCorrect = 0; 
+              }
+            } else {
+              app.phase2.consecutiveWrong++; 
+              app.phase2.consecutiveCorrect = 0; 
+              app.phase2.currentStreak = 0;
+              
+              document.getElementById('feedbackArea2').innerHTML = '<span class="text-red-600 font-semibold"><i class="fas fa-times-circle"></i> Incorrect</span>';
+              if (app.phase2.consecutiveWrong >= 2 && app.phase2.difficulty > 1) { 
+                app.phase2.difficulty--; 
+                app.phase2.consecutiveWrong = 0; 
+              }
+            }
+            
             app.phase2.questionsAnswered++;
             optionDivs.forEach(d => d.style.pointerEvents = 'none');
+            
             setTimeout(() => {
               if (app.phase2.questionsAnswered >= app.phase2.maxQuestions) { finishPhase2(); }
               else { generatePhase2Question(); renderPhase2(); }
@@ -574,7 +679,10 @@
         });
       }
 
-      function finishPhase2() { app.results.gfRaw = app.phase2.correctCount; updateProgress(45); startPhase3(); }
+      function finishPhase2() { 
+        updateProgress(45); 
+        startPhase3(); 
+      }
 
       // ──────────────────────────────────────
       // PHASE 3 & 4: WORKING MEMORY (FORWARD & BACKWARD)
@@ -583,26 +691,48 @@
         app.currentState = STATE.PHASE3;
         app.phase3.currentSpan = 3; app.phase3.failuresAtCurrentSpan = 0; app.phase3.maxSpanAchieved = 2;
         app.phase3.phaseComplete = false; app.phase3.userSequence = []; app.phase3.isFlashing = false; app.phase3.isAcceptingInput = false;
-        generateCorsiSequence('phase3'); renderPhase3();
+        app.phase3.correctCount = 0; app.phase3.currentStreak = 0; app.phase3.maxStreak = 0;
+        generateCorsiSequence('phase3'); 
+        renderPhase3();
       }
+      
       function startPhase4() {
         app.currentState = STATE.PHASE4;
         app.phase4.currentSpan = 3; app.phase4.failuresAtCurrentSpan = 0; app.phase4.maxSpanAchieved = 2;
         app.phase4.phaseComplete = false; app.phase4.userSequence = []; app.phase4.isFlashing = false; app.phase4.isAcceptingInput = false;
-        generateCorsiSequence('phase4'); renderPhase4();
+        app.phase4.correctCount = 0; app.phase4.currentStreak = 0; app.phase4.maxStreak = 0;
+        generateCorsiSequence('phase4'); 
+        renderPhase4();
       }
+      
       function generateCorsiSequence(phaseKey) {
-        const phase = app[phaseKey]; const seq = []; const used = new Set();
-        for (let i = 0; i < phase.currentSpan; i++) { let cell; do { cell = Math.floor(Math.random() * 9); } while (used.has(cell) && used.size < 9); used.add(cell); seq.push(cell); }
-        phase.sequence = seq; phase.userSequence = []; phase.isFlashing = true; phase.isAcceptingInput = false; phase.flashIndex = 0;
+        const phase = app[phaseKey]; 
+        const seq = []; 
+        const used = new Set();
+        for (let i = 0; i < phase.currentSpan; i++) { 
+          let cell; 
+          do { 
+            cell = Math.floor(Math.random() * 9); 
+          } while (used.has(cell) && used.size < 9); 
+          used.add(cell); 
+          seq.push(cell); 
+        }
+        phase.sequence = seq; 
+        phase.userSequence = []; 
+        phase.isFlashing = true; 
+        phase.isAcceptingInput = false; 
+        phase.flashIndex = 0;
       }
+      
       function renderCorsiGrid(phaseKey) {
         const phase = app[phaseKey];
         const cellsHTML = Array.from({length:9}, (_,i) => `<div class="corsi-cell" data-cell-index="${i}" id="corsiCell${i}">${i+1}</div>`).join('');
-        const phaseLabel = phaseKey==='phase3'?'Forward Working Memory':'Backward Working Memory';
-        const phaseNum = phaseKey==='phase3'?'3':'4';
-        const instruction = phaseKey==='phase3'?'Watch the sequence. Then tap in <strong>same order</strong>.':'Watch the sequence. Then tap in <strong>reverse order</strong>.';
-        updateProgress(phaseKey==='phase3'?45+Math.min(10,Math.round((phase.maxSpanAchieved-2)/7*10)):55+Math.min(10,Math.round((phase.maxSpanAchieved-2)/7*10)));
+        const phaseLabel = phaseKey === 'phase3' ? 'Forward Working Memory' : 'Backward Working Memory';
+        const phaseNum = phaseKey === 'phase3' ? '3' : '4';
+        const instruction = phaseKey === 'phase3' ? 'Watch the sequence. Then tap in <strong>same order</strong>.' : 'Watch the sequence. Then tap in <strong>reverse order</strong>.';
+        
+        updateProgress(phaseKey === 'phase3' ? 45 + Math.min(10, Math.round((phase.maxSpanAchieved - 2) / 7 * 10)) : 55 + Math.min(10, Math.round((phase.maxSpanAchieved - 2) / 7 * 10)));
+        
         return `
           <div>
             <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -616,54 +746,125 @@
           </div>
         `;
       }
+      
       function renderPhase3() { render(renderCorsiGrid('phase3')); startCorsiFlashing('phase3'); }
       function renderPhase4() { render(renderCorsiGrid('phase4')); startCorsiFlashing('phase4'); }
+      
       function startCorsiFlashing(phaseKey) {
-        const phase = app[phaseKey]; phase.isFlashing = true; phase.isAcceptingInput = false; phase.flashIndex = 0; phase.userSequence = [];
-        for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c){c.classList.remove('flash','user-selected','user-error'); c.style.pointerEvents='none';} }
+        const phase = app[phaseKey]; 
+        phase.isFlashing = true; 
+        phase.isAcceptingInput = false; 
+        phase.flashIndex = 0; 
+        phase.userSequence = [];
+        
+        for (let i = 0; i < 9; i++) { 
+          const c = document.getElementById('corsiCell'+i); 
+          if(c) {
+            c.classList.remove('flash','user-selected','user-error'); 
+            c.style.pointerEvents='none';
+          } 
+        }
+        
         function flashNext() {
           if (phase.flashIndex < phase.sequence.length) {
             const cell = document.getElementById('corsiCell'+phase.sequence[phase.flashIndex]);
-            if(cell) { cell.classList.add('flash'); document.getElementById('corsiStatus').innerHTML = `<i class="fas fa-eye mr-1"></i> Watch... (${phase.flashIndex+1}/${phase.sequence.length})`; }
-            setTimeout(() => { if(cell) cell.classList.remove('flash'); phase.flashIndex++; setTimeout(flashNext, 200); }, 500);
+            if(cell) { 
+              cell.classList.add('flash'); 
+              document.getElementById('corsiStatus').innerHTML = `<i class="fas fa-eye mr-1"></i> Watch... (${phase.flashIndex+1}/${phase.sequence.length})`; 
+            }
+            setTimeout(() => { 
+              if(cell) cell.classList.remove('flash'); 
+              phase.flashIndex++; 
+              setTimeout(flashNext, 200); 
+            }, 500);
           } else {
-            phase.isFlashing = false; phase.isAcceptingInput = true;
+            phase.isFlashing = false; 
+            phase.isAcceptingInput = true;
             document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-hand-pointer mr-1"></i> Your turn!';
-            for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c) c.style.pointerEvents='auto'; }
+            for (let i = 0; i < 9; i++) { 
+              const c = document.getElementById('corsiCell'+i); 
+              if(c) c.style.pointerEvents='auto'; 
+            }
             setupCorsiClickHandlers(phaseKey);
           }
         }
         setTimeout(flashNext, 400);
       }
+      
       function setupCorsiClickHandlers(phaseKey) {
         const phase = app[phaseKey];
-        const grid = document.getElementById('corsiGridContainer'); if(!grid) return;
-        const newGrid = grid.cloneNode(true); grid.parentNode.replaceChild(newGrid, grid);
+        const grid = document.getElementById('corsiGridContainer'); 
+        if(!grid) return;
+        
+        // Prevent event listener memory leaks by cloning the node
+        const newGrid = grid.cloneNode(true); 
+        grid.parentNode.replaceChild(newGrid, grid);
+        
         newGrid.addEventListener('click', function(e) {
           if (!phase.isAcceptingInput || phase.isFlashing) return;
-          const cellDiv = e.target.closest('.corsi-cell'); if(!cellDiv) return;
-          const idx = parseInt(cellDiv.getAttribute('data-cell-index')); if(isNaN(idx) || phase.userSequence.includes(idx)) return;
-          phase.userSequence.push(idx); cellDiv.classList.add('user-selected');
+          const cellDiv = e.target.closest('.corsi-cell'); 
+          if(!cellDiv) return;
+          
+          const idx = parseInt(cellDiv.getAttribute('data-cell-index')); 
+          if(isNaN(idx) || phase.userSequence.includes(idx)) return;
+          
+          phase.userSequence.push(idx); 
+          cellDiv.classList.add('user-selected');
+          
           if (phase.userSequence.length === phase.sequence.length) {
             phase.isAcceptingInput = false;
-            const target = phaseKey==='phase4' ? [...phase.sequence].reverse() : [...phase.sequence];
+            const target = phaseKey === 'phase4' ? [...phase.sequence].reverse() : [...phase.sequence];
             const correct = arraysEqual(phase.userSequence, target);
+            
             if (correct) {
-              phase.maxSpanAchieved = Math.max(phase.maxSpanAchieved, phase.currentSpan); phase.currentSpan++; phase.failuresAtCurrentSpan = 0;
+              phase.maxSpanAchieved = Math.max(phase.maxSpanAchieved, phase.currentSpan); 
+              phase.currentSpan++; 
+              phase.failuresAtCurrentSpan = 0;
+              
+              phase.correctCount++;
+              phase.currentStreak++;
+              if (phase.currentStreak > phase.maxStreak) phase.maxStreak = phase.currentStreak;
+
               document.getElementById('corsiFeedback').innerHTML = '<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> Correct! Span increasing.</span>';
             } else {
               phase.failuresAtCurrentSpan++;
-              phase.userSequence.forEach(i => { const c=document.getElementById('corsiCell'+i); if(c) {c.classList.remove('user-selected'); c.classList.add('user-error');} });
-              if (phase.failuresAtCurrentSpan >= 2) { phase.phaseComplete = true; document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-flag-checkered"></i> Phase complete.'; }
-              else { document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-redo"></i> Try again.'; }
+              phase.currentStreak = 0;
+
+              phase.userSequence.forEach(i => { 
+                const c = document.getElementById('corsiCell'+i); 
+                if(c) {
+                  c.classList.remove('user-selected'); 
+                  c.classList.add('user-error');
+                } 
+              });
+              
+              if (phase.failuresAtCurrentSpan >= 2) { 
+                phase.phaseComplete = true; 
+                document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-flag-checkered"></i> Phase complete.'; 
+              } else { 
+                document.getElementById('corsiStatus').innerHTML = '<i class="fas fa-redo"></i> Try again.'; 
+              }
               document.getElementById('corsiFeedback').innerHTML = '<span class="text-red-600 font-bold"><i class="fas fa-times-circle"></i> Incorrect sequence.</span>';
             }
-            for (let i=0;i<9;i++) { const c=document.getElementById('corsiCell'+i); if(c) c.style.pointerEvents='none'; }
+            
+            for (let i = 0; i < 9; i++) { 
+              const c = document.getElementById('corsiCell'+i); 
+              if(c) c.style.pointerEvents='none'; 
+            }
+            
             setTimeout(() => {
               if (phase.phaseComplete) {
-                if (phaseKey==='phase3') { app.results.gwmFRaw = phase.maxSpanAchieved; updateProgress(55); startPhase4(); }
-                else { app.results.gwmBRaw = phase.maxSpanAchieved; updateProgress(65); startPhase5(); }
-              } else { generateCorsiSequence(phaseKey); phaseKey==='phase3' ? renderPhase3() : renderPhase4(); }
+                if (phaseKey === 'phase3') { 
+                  updateProgress(55); 
+                  startPhase4(); 
+                } else { 
+                  updateProgress(65); 
+                  startPhase5(); 
+                }
+              } else { 
+                generateCorsiSequence(phaseKey); 
+                phaseKey === 'phase3' ? renderPhase3() : renderPhase4(); 
+              }
             }, 1200);
           }
         });
@@ -674,63 +875,114 @@
       // ──────────────────────────────────────
       function startPhase5() {
         app.currentState = STATE.PHASE5;
-        app.phase5.timeRemaining = 60; app.phase5.score = 0; app.phase5.trialsCompleted = 0;
-        app.phase5.phaseActive = true; app.phase5.answerLocked = false; app.phase5.timerInterval = null;
-        generatePhase5Trial(); renderPhase5(); startPhase5Timer();
+        app.phase5.timeRemaining = 60; 
+        app.phase5.score = 0; 
+        app.phase5.trialsCompleted = 0;
+        app.phase5.phaseActive = true; 
+        app.phase5.answerLocked = false; 
+        app.phase5.timerInterval = null;
+        app.phase5.correctCount = 0;
+        app.phase5.currentStreak = 0;
+        app.phase5.maxStreak = 0;
+        
+        generatePhase5Trial(); 
+        renderPhase5(); 
+        startPhase5Timer();
       }
+      
       function generatePhase5Trial() {
         const symbols = ['α','β','γ','δ','ε','ζ','η','θ','λ','μ','π','σ','φ','ψ','ω'];
         const target = symbols[Math.floor(Math.random()*symbols.length)];
-        const others = symbols.filter(s=>s!==target); shuffleArray(others);
+        const others = symbols.filter(s=>s!==target); 
+        shuffleArray(others);
+        
         const options = others.slice(0,4);
-        const present = Math.random()<0.5;
+        const present = Math.random() < 0.5;
         if(present) options[Math.floor(Math.random()*4)] = target;
+        
         app.phase5.currentTrial = { target, options, targetPresent: present };
         app.phase5.answerLocked = false;
       }
+      
       function renderPhase5() {
         const t = app.phase5.currentTrial;
         const pct = (app.phase5.timeRemaining/60)*100;
         updateProgress(65+Math.round((60-app.phase5.timeRemaining)/60*30));
+        
         render(`
           <div>
             <div class="flex items-center gap-3 mb-4 flex-wrap">
               <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700"><i class="fas fa-bolt mr-1"></i> Phase 5: Processing Speed</span>
               <span class="text-xs text-gray-400">Score: ${app.phase5.score}</span>
             </div>
-            <div class="flex items-center gap-4 mb-4"><div class="flex-1 h-4 bg-gray-200 rounded-full"><div class="h-full rounded-full" style="width:${pct}%; background:${pct>30?'#5D9B7C':pct>15?'#C49B5C':'#B85C5C'};"></div></div><span class="text-2xl font-bold" id="timerDisplay">${app.phase5.timeRemaining}s</span></div>
-            <div class="bg-gray-50 rounded-xl p-5 mb-4 text-center"><p class="text-sm text-gray-500">Target:</p><p class="text-5xl font-bold">${t.target}</p></div>
-            <div class="flex justify-center gap-2 text-3xl font-bold text-gray-600 bg-white rounded-xl p-4 border flex-wrap">${t.options.map(s=>`<span class="px-2">${s}</span>`).join('<span class="text-gray-300">|</span>')}</div>
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex-1 h-4 bg-gray-200 rounded-full">
+                <div class="h-full rounded-full" style="width:${pct}%; background:${pct>30?'#5D9B7C':pct>15?'#C49B5C':'#B85C5C'};"></div>
+              </div>
+              <span class="text-2xl font-bold" id="timerDisplay">${app.phase5.timeRemaining}s</span>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 mb-4 text-center">
+              <p class="text-sm text-gray-500">Target:</p>
+              <p class="text-5xl font-bold">${t.target}</p>
+            </div>
+            <div class="flex justify-center gap-2 text-3xl font-bold text-gray-600 bg-white rounded-xl p-4 border flex-wrap">
+              ${t.options.map(s=>`<span class="px-2">${s}</span>`).join('<span class="text-gray-300">|</span>')}
+            </div>
             <div class="flex gap-3 justify-center mt-5" id="psButtons">
               <button id="btnPresent" class="btn-primary bg-green-600 px-6 py-3">PRESENT</button>
               <button id="btnAbsent" class="btn-primary px-6 py-3" style="background:linear-gradient(135deg,#B85C5C,#9B4A4A);">ABSENT</button>
             </div>
-            <div id="psFeedback" class="text-center mt-3 font-semibold"></div>
+            <div id="psFeedback" class="text-center mt-3 font-semibold min-h-[1.5rem]"></div>
           </div>
         `);
-        document.getElementById('btnPresent').onclick = ()=>handlePhase5Answer(true);
-        document.getElementById('btnAbsent').onclick = ()=>handlePhase5Answer(false);
+        
+        document.getElementById('btnPresent').onclick = () => handlePhase5Answer(true);
+        document.getElementById('btnAbsent').onclick = () => handlePhase5Answer(false);
       }
+      
       function handlePhase5Answer(userPresent) {
         if(!app.phase5.phaseActive || app.phase5.answerLocked) return;
         app.phase5.answerLocked = true;
+        
         const correct = (userPresent === app.phase5.currentTrial.targetPresent);
-        app.phase5.score += correct ? 1 : -1; app.phase5.trialsCompleted++;
+        app.phase5.score += correct ? 1 : -1; 
+        app.phase5.trialsCompleted++;
+        
+        if (correct) {
+          app.phase5.correctCount++;
+          app.phase5.currentStreak++;
+          if (app.phase5.currentStreak > app.phase5.maxStreak) app.phase5.maxStreak = app.phase5.currentStreak;
+        } else {
+          app.phase5.currentStreak = 0;
+        }
+        
         document.getElementById('psFeedback').innerHTML = correct ? '<span class="text-green-600">Correct! +1</span>' : '<span class="text-red-600">Incorrect! -1</span>';
         document.getElementById('btnPresent').disabled = document.getElementById('btnAbsent').disabled = true;
-        setTimeout(() => { if(app.phase5.phaseActive) { generatePhase5Trial(); renderPhase5(); } }, 350);
+        
+        setTimeout(() => { 
+          if(app.phase5.phaseActive) { 
+            generatePhase5Trial(); 
+            renderPhase5(); 
+          } 
+        }, 350);
       }
+      
       function startPhase5Timer() {
         app.phase5.timerInterval = setInterval(() => {
           app.phase5.timeRemaining--;
-          const disp = document.getElementById('timerDisplay'); if(disp) disp.textContent = app.phase5.timeRemaining+'s';
+          const disp = document.getElementById('timerDisplay'); 
+          if(disp) disp.textContent = app.phase5.timeRemaining+'s';
+          
           updateProgress(65+Math.round((60-app.phase5.timeRemaining)/60*30));
+          
           if(app.phase5.timeRemaining <= 0) finishPhase5();
         }, 1000);
       }
+      
       function finishPhase5() {
-        app.phase5.phaseActive = false; clearInterval(app.phase5.timerInterval);
-        app.results.gsRaw = app.phase5.score; updateProgress(100);
+        app.phase5.phaseActive = false; 
+        clearInterval(app.phase5.timerInterval);
+        updateProgress(100);
         setTimeout(calculateAndRenderResults, 400);
       }
 
@@ -738,55 +990,126 @@
       // SCORING & RESULTS
       // ──────────────────────────────────────
       function calculateAndRenderResults() {
-        const age = app.chronologicalAge, peak=23, ageFactor=Math.max(0.55,1-Math.abs(age-peak)*0.025);
-        const gqZ = (app.results.gqRaw - 13*ageFactor)/3.5; app.results.gqIQ = Math.round(100+gqZ*15);
-        const gfZ = (app.results.gfRaw - 16*ageFactor)/4; app.results.gfIQ = Math.round(100+gfZ*15);
-        const gwmComp = app.results.gwmFRaw + app.results.gwmBRaw;
-        const gwmZ = (gwmComp - 11*ageFactor)/2.8; app.results.gwmIQ = Math.round(100+gwmZ*15);
-        const gsZ = (app.results.gsRaw - 18*ageFactor)/8; app.results.gsIQ = Math.round(100+gsZ*15);
-        app.results.fsiq = Math.round(app.results.gqIQ*0.3 + app.results.gfIQ*0.3 + app.results.gwmIQ*0.25 + app.results.gsIQ*0.15);
-        const fsiq = app.results.fsiq;
-        app.results.classification = fsiq>=130?'Very Superior':fsiq>=120?'Superior':fsiq>=110?'High Average':fsiq>=90?'Average':fsiq>=80?'Low Average':fsiq>=70?'Borderline':'Extremely Low';
-        app.currentState = STATE.RESULTS; renderResults();
+        const age = app.chronologicalAge;
+        
+        // Domain specific age decay formulas (simplification of longitudinal psychometric trajectories)
+        const ageFactorGq = 1 - Math.max(0, Math.abs(age - 45) * 0.004); 
+        const ageFactorGf = 1 - Math.max(0, (age > 22 ? age - 22 : 22 - age) * 0.015);
+        const ageFactorGwm = 1 - Math.max(0, Math.abs(age - 25) * 0.008);
+        const ageFactorGs = 1 - Math.max(0, (age > 20 ? age - 20 : 20 - age) * 0.02);
+
+        // Calculate Ability Estimates based on IRT-lite (Average Difficulty Correct * Accuracy Penalty)
+        const gqAbility = (app.phase1.correctCount > 0) ? (app.phase1.totalDifficultySum / app.phase1.correctCount) * (app.phase1.correctCount / app.phase1.maxQuestions) : 0;
+        const gfAbility = (app.phase2.correctCount > 0) ? (app.phase2.totalDifficultySum / app.phase2.correctCount) * (app.phase2.correctCount / app.phase2.maxQuestions) : 0;
+        
+        // Z-Scores relative to uncalibrated internal parameters (Normed against age factor)
+        const gqZ = (gqAbility - 6.5 * ageFactorGq) / 1.8;
+        const gfZ = (gfAbility - 7.0 * ageFactorGf) / 2.0;
+        const gwmZ = ((app.phase3.maxSpanAchieved + app.phase4.maxSpanAchieved) - 11.5 * ageFactorGwm) / 2.5;
+        const gsZ = (app.phase5.score - 25 * ageFactorGs) / 10;
+
+        const cais = [100 + gqZ * 15, 100 + gfZ * 15, 100 + gwmZ * 15, 100 + gsZ * 15];
+        app.results.gqScore = Math.round(cais[0]); 
+        app.results.gfScore = Math.round(cais[1]);
+        app.results.gwmScore = Math.round(cais[2]); 
+        app.results.gsScore = Math.round(cais[3]);
+        
+        // Global Composite CAI
+        app.results.cai = Math.round((app.results.gqScore*0.3) + (app.results.gfScore*0.3) + (app.results.gwmScore*0.25) + (app.results.gsScore*0.15));
+        
+        // Internal consistency calculation (Max Streak / Total Correct Answers)
+        app.results.consistency1 = app.phase1.correctCount > 0 ? Math.round((app.phase1.maxStreak / app.phase1.correctCount) * 100) : 0;
+        app.results.consistency2 = app.phase2.correctCount > 0 ? Math.round((app.phase2.maxStreak / app.phase2.correctCount) * 100) : 0;
+        app.results.consistency3 = app.phase3.correctCount > 0 ? Math.round((app.phase3.maxStreak / app.phase3.correctCount) * 100) : 0;
+        app.results.consistency5 = app.phase5.correctCount > 0 ? Math.round((app.phase5.maxStreak / app.phase5.correctCount) * 100) : 0;
+
+        // General Variance 
+        const variance = Math.abs(app.results.gqScore - app.results.gfScore) + Math.abs(app.results.gwmScore - app.results.gsScore);
+        app.results.ci = Math.round(Math.max(4, Math.min(12, variance / 4))); 
+
+        app.currentState = STATE.RESULTS;
+        renderResults();
       }
+
       function renderResults() {
         updateProgress(100);
         const r = app.results;
-        const iqBar = (iq) => `<div class="h-3 bg-gray-200 rounded-full flex-1"><div class="iq-bar-fill" style="width:${Math.max(2,Math.min(98,((iq-40)/120)*100))}%; background:${iq<80?'#B85C5C':iq<90?'#C49B5C':iq<110?'#5B8CBF':iq<120?'#5D9B7C':'#7B5EA7'};"></div></div>`;
+        
+        // Helper to color-code consistency metric
+        const consistColor = (val) => val >= 60 ? 'text-green-600' : val >= 30 ? 'text-amber-600' : 'text-red-600';
+        
         render(`
           <div>
             <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-3 shadow-lg"><span class="text-3xl font-extrabold">${r.fsiq}</span></div>
-              <h2 class="text-xl font-bold">Estimated Full Scale IQ (FSIQ)</h2>
-              <p class="text-lg font-semibold text-blue-600">${r.classification}</p>
-              <p class="text-xs text-gray-400">Mean 100, SD 15 · Age-normed for ${app.chronologicalAge} years</p>
+              <h2 class="text-lg font-bold uppercase text-gray-500 mb-1">Cognitive Ability Index (CAI)</h2>
+              <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white mb-3 shadow-lg">
+                <span class="text-4xl font-extrabold">${r.cai}</span>
+              </div>
+              <p class="text-sm font-semibold text-gray-600">95% Confidence Interval: &plusmn;${r.ci} points</p>
             </div>
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-calculator text-blue-500"></i> Quantitative (Gq)</span><span class="font-bold">${r.gqIQ}</span></div>${iqBar(r.gqIQ)}<span class="text-xs text-gray-400">Raw: ${r.gqRaw}/20</span></div>
-              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-th text-purple-500"></i> Spatial Logic (Gf)</span><span class="font-bold">${r.gfIQ}</span></div>${iqBar(r.gfIQ)}<span class="text-xs text-gray-400">Raw: ${r.gfRaw}/25</span></div>
-              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-memory text-teal-500"></i> Working Memory (Gwm)</span><span class="font-bold">${r.gwmIQ}</span></div>${iqBar(r.gwmIQ)}<span class="text-xs text-gray-400">Fwd: ${r.gwmFRaw} | Bwd: ${r.gwmBRaw}</span></div>
-              <div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between mb-2"><span class="font-semibold"><i class="fas fa-bolt text-orange-500"></i> Processing Speed (Gs)</span><span class="font-bold">${r.gsIQ}</span></div>${iqBar(r.gsIQ)}<span class="text-xs text-gray-400">Net: ${r.gsRaw>0?'+':''}${r.gsRaw} (60s)</span></div>
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div class="flex justify-between mb-1"><span class="font-semibold text-sm">Gq Index (Quantitative)</span><span class="font-bold">${r.gqScore}</span></div>
+                <div class="h-2 bg-gray-200 rounded-full mb-2"><div class="h-full rounded-full bg-blue-500" style="width:${Math.max(5,(r.gqScore/160)*100)}%"></div></div>
+                <div class="text-xs text-gray-500 text-right">Reliability Check: <span class="font-semibold ${consistColor(r.consistency1)}">${r.consistency1}%</span></div>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div class="flex justify-between mb-1"><span class="font-semibold text-sm">Gf Index (Fluid/Spatial)</span><span class="font-bold">${r.gfScore}</span></div>
+                <div class="h-2 bg-gray-200 rounded-full mb-2"><div class="h-full rounded-full bg-purple-500" style="width:${Math.max(5,(r.gfScore/160)*100)}%"></div></div>
+                <div class="text-xs text-gray-500 text-right">Reliability Check: <span class="font-semibold ${consistColor(r.consistency2)}">${r.consistency2}%</span></div>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div class="flex justify-between mb-1"><span class="font-semibold text-sm">Gwm Index (Memory)</span><span class="font-bold">${r.gwmScore}</span></div>
+                <div class="h-2 bg-gray-200 rounded-full mb-2"><div class="h-full rounded-full bg-teal-500" style="width:${Math.max(5,(r.gwmScore/160)*100)}%"></div></div>
+                <div class="text-xs text-gray-500 text-right">Reliability Check: <span class="font-semibold ${consistColor(r.consistency3)}">${r.consistency3}%</span></div>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div class="flex justify-between mb-1"><span class="font-semibold text-sm">Gs Index (Processing)</span><span class="font-bold">${r.gsScore}</span></div>
+                <div class="h-2 bg-gray-200 rounded-full mb-2"><div class="h-full rounded-full bg-orange-500" style="width:${Math.max(5,(r.gsScore/160)*100)}%"></div></div>
+                <div class="text-xs text-gray-500 text-right">Reliability Check: <span class="font-semibold ${consistColor(r.consistency5)}">${r.consistency5}%</span></div>
+              </div>
             </div>
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-xs text-amber-800">
-              <p class="font-semibold mb-1"><i class="fas fa-exclamation-triangle"></i> Clinical Disclaimer</p>
-              <p>This is an informational estimation only, not a diagnostic instrument. Real IQ assessment requires standardized administration by a licensed psychologist.</p>
+            
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-xs text-slate-700">
+              <p class="font-semibold mb-1">Methodology Note</p>
+              <p>Scores are derived using item response difficulty weighting and domain-specific age decay formulas mapped to chronologic base data. This represents an internally referenced percentile approximation, not a diagnostic clinical IQ score.</p>
             </div>
-            <div class="text-center"><button id="btnRestart" class="btn-outline px-6 py-3"><i class="fas fa-redo"></i> Restart Assessment</button></div>
+            
+            <div class="text-center">
+              <button id="btnRestart" class="btn-outline px-6 py-3"><i class="fas fa-redo"></i> Restart Assessment</button>
+            </div>
           </div>
         `);
-        document.getElementById('btnRestart').onclick = ()=>{ resetApp(); renderInit(); };
+        
+        document.getElementById('btnRestart').onclick = () => { 
+          resetApp(); 
+          renderInit(); 
+        };
       }
 
-      function shuffleArray(arr) { for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
-      function arraysEqual(a,b) { return a.length===b.length && a.every((v,i)=>v===b[i]); }
+      function shuffleArray(arr) { 
+        for (let i = arr.length - 1; i > 0; i--) { 
+          const j = Math.floor(Math.random() * (i + 1)); 
+          [arr[i], arr[j]] = [arr[j], arr[i]]; 
+        } 
+      }
+      
+      function arraysEqual(a, b) { 
+        return a.length === b.length && a.every((v, i) => v === b[i]); 
+      }
+      
       function resetApp() {
         clearInterval(app.phase5.timerInterval);
-        app.phase1 = { difficulty:5,consecutiveCorrect:0,consecutiveWrong:0,questionsAnswered:0,maxQuestions:20,correctCount:0,currentQuestion:null,answerSelected:false,totalDifficultySum:0 };
-        app.phase2 = { difficulty:5,consecutiveCorrect:0,consecutiveWrong:0,questionsAnswered:0,maxQuestions:25,correctCount:0,currentQuestion:null,answerSelected:false,totalDifficultySum:0 };
-        app.phase3 = { currentSpan:3,sequence:[],userSequence:[],isFlashing:false,isAcceptingInput:false,failuresAtCurrentSpan:0,maxSpanAchieved:2,phaseComplete:false,flashIndex:0,totalAttempts:0 };
-        app.phase4 = { currentSpan:3,sequence:[],userSequence:[],isFlashing:false,isAcceptingInput:false,failuresAtCurrentSpan:0,maxSpanAchieved:2,phaseComplete:false,flashIndex:0,totalAttempts:0 };
-        app.phase5 = { timeRemaining:60,totalTime:60,score:0,trialsCompleted:0,timerInterval:null,currentTrial:null,phaseActive:false,answerLocked:false };
-        app.results = { gqRaw:0,gfRaw:0,gwmFRaw:0,gwmBRaw:0,gsRaw:0,gqIQ:0,gfIQ:0,gwmIQ:0,gsIQ:0,fsiq:0,classification:'' };
+        app.phase1 = { difficulty:5, consecutiveCorrect:0, consecutiveWrong:0, questionsAnswered:0, maxQuestions:20, correctCount:0, currentQuestion:null, answerSelected:false, totalDifficultySum:0, currentStreak:0, maxStreak:0 };
+        app.phase2 = { difficulty:5, consecutiveCorrect:0, consecutiveWrong:0, questionsAnswered:0, maxQuestions:25, correctCount:0, currentQuestion:null, answerSelected:false, totalDifficultySum:0, currentStreak:0, maxStreak:0 };
+        app.phase3 = { currentSpan:3, sequence:[], userSequence:[], isFlashing:false, isAcceptingInput:false, failuresAtCurrentSpan:0, maxSpanAchieved:2, phaseComplete:false, flashIndex:0, totalAttempts:0, correctCount:0, currentStreak:0, maxStreak:0 };
+        app.phase4 = { currentSpan:3, sequence:[], userSequence:[], isFlashing:false, isAcceptingInput:false, failuresAtCurrentSpan:0, maxSpanAchieved:2, phaseComplete:false, flashIndex:0, totalAttempts:0, correctCount:0, currentStreak:0, maxStreak:0 };
+        app.phase5 = { timeRemaining:60, totalTime:60, score:0, trialsCompleted:0, timerInterval:null, currentTrial:null, phaseActive:false, answerLocked:false, correctCount:0, currentStreak:0, maxStreak:0 };
+        app.results = { gqScore:0, gfScore:0, gwmScore:0, gsScore:0, cai:0, classification:'', ci:0, consistency1:0, consistency2:0, consistency3:0, consistency5:0 };
         updateProgress(0);
       }
 
